@@ -91,8 +91,12 @@
     --max:1320px;
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{background:var(--paper);color:var(--ink);font-family:'Poppins',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.55}
+  /* overflow-x:clip en html corta cualquier desborde horizontal accidental sin
+     romper position:sticky ni el scroll (a diferencia de overflow:hidden). Evita
+     que un solo elemento más ancho que la pantalla ensanche TODA la página en
+     iOS Safari (margen raro a la derecha / "zoom" / grilla rota). */
+  html{scroll-behavior:smooth;overflow-x:clip}
+  body{background:var(--paper);color:var(--ink);font-family:'Poppins',sans-serif;overflow-x:clip;max-width:100%;-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.55}
   ::selection{background:var(--ink);color:var(--paper)}
   img,canvas,video,iframe{display:block;max-width:100%}
   button{font-family:inherit}
@@ -1052,6 +1056,16 @@
     .nav.menu-open .nav-right{width:100%;padding:0 22px 18px}
     .nav.menu-open .nav-right .lang-btn{display:inline-flex}
     .hero{padding:120px 0 64px;min-height:auto;gap:32px}
+    /* Tarjetas "Diseño / Ilustración" del hero: en mobile la palabra larga
+       ("Ilustración") + padding de 32px no entraba en media pantalla y la
+       columna 1fr se negaba a achicarse → desbordaba y ensanchaba toda la
+       página. minmax(0,1fr) + min-width:0 dejan que la celda se achique, y
+       bajamos padding/tipografía para que el texto entre sin cortarse. */
+    .hero-section-cards{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .hero-card{min-width:0;padding:18px 18px 16px}
+    .hero-card-title{font-size:clamp(22px,5.6vw,34px);overflow-wrap:break-word}
+    .hero-ctas{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    .hero-ctas > *{min-width:0}
     .sec{padding:80px 0}
     .sec-head{grid-template-columns:1fr;gap:18px;margin-bottom:56px}
     .sec-num{padding-top:0}
@@ -1282,6 +1296,13 @@
   .pj-gorillaz-version-img > img, .about-r > img, .pj-9r-section-cover > img {
     position: absolute; inset: 0;
   }
+
+  /* Ítems de grilla que deben poder achicarse para no desbordar el viewport
+     (sin esto, el contenido fija un ancho mínimo y rompe la grilla en mobile). */
+  .pj-gorillaz-pair, .pj-gorillaz-strip, .pj-gorillaz-versions,
+  .pj-koizone-grid, .pj-koizone-stage, .pj-9r-stage { min-width: 0; }
+  .pj-gorillaz-pair-item, .pj-gorillaz-block, .pj-gorillaz-version,
+  .pj-koizone-tile, .pj-koizone-flip, .pj-koizone-side { min-width: 0; }
 </style>
 </head>
 <body>
