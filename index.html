@@ -1179,7 +1179,10 @@
     .pj-tesis-slug-r{justify-content:flex-start}
     .pj-tesis-hero-wrap{padding:36px 0 36px}
     .pj-tesis-hero{grid-template-columns:1fr;min-height:auto}
-    .pj-tesis-hero-img{min-height:320px;aspect-ratio:4/3}
+    /* En mobile, alto fijo SIN aspect-ratio: con min-height + aspect-ratio la altura
+       ataba el ancho a 427px (320×4/3) y el bloque se salía del viewport recortando
+       la imagen. Con height fijo el ancho sigue la celda (100%) y no desborda. */
+    .pj-tesis-hero-img{min-height:0;height:300px;aspect-ratio:auto;min-width:0}
     .pj-tesis-hero-text{padding:32px 24px;border-left:none;border-top:1px solid var(--rule)}
     .pj-tesis-band{aspect-ratio:16/10;min-height:280px}
     .pj-tesis-band-inner{padding:24px 22px}
@@ -1686,11 +1689,13 @@ function PdfThumb({ src, fallback, className, alt }) {
 
   useEffect(() => {
     if (__pdfThumbCache[src]) {setDataUrl(__pdfThumbCache[src]);return;}
-    // Si hay portada estática, la usamos y NO abrimos el PDF para la miniatura.
-    // (Abrir 5 documentos PDF a la vez al entrar a la sección reventaba la memoria
-    //  en iOS Safari → "ocurrió un problema varias veces". El PDF recién se carga
-    //  cuando el usuario abre el lector.)
-    if (fallback) {return;}
+    // SOLO EN MOBILE: si hay portada estática, la usamos y NO abrimos el PDF para la
+    // miniatura. (Abrir varios documentos PDF a la vez al entrar a la sección reventaba
+    // la memoria en iOS Safari → "ocurrió un problema varias veces". El PDF recién se
+    // carga cuando el usuario abre el lector.) En DESKTOP sí renderizamos la 1ª página
+    // real del PDF: es la portada correcta y no hay problema de memoria.
+    var __thumbMobile = (typeof window !== 'undefined' && window.innerWidth <= 980);
+    if (fallback && __thumbMobile) {return;}
     // En file:// (zip descargado, abierto local) pdf.js no puede fetchar los PDFs.
     // Usamos directamente la imagen de portada estática.
     if (window.__IS_FILE_PROTOCOL) {setErrored(true);return;}
