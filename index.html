@@ -1071,9 +1071,15 @@
        así el borde inferior de la pantalla coincide con el fin de la tarjeta de
        Ilustración y la sección 03 queda recién debajo del fold (sin hueco raro). */
     .hero-landing{min-height:100vh;min-height:100svh;grid-template-rows:auto 1fr auto;padding:84px 0 0;gap:10px}
-    .hero-landing .hero-main{padding:0 22px;justify-content:center}
+    .hero-landing .hero-main{padding:0 22px;justify-content:center;gap:4px}
     .hero-eyebrow{margin-bottom:0}
     .hero-logo{max-height:24vh}
+    /* En mobile sacamos el párrafo introductorio para dar AIRE (en desktop sigue).
+       Mucho texto al entrar satura a quien no conoce la página. */
+    .hero-tagline{display:none}
+    /* Un poco más de respiro entre el nombre y los botones */
+    .hero-sub{margin-top:20px}
+    .hero-mini-ctas{margin-top:24px}
     /* hero-top: que envuelva en vez de empujar el ancho de la página */
     .hero-top{flex-wrap:wrap;gap:4px 12px}
     /* Tarjetas apiladas (1 columna), pegadas al fondo del hero */
