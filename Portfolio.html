@@ -1426,7 +1426,7 @@
       {"type":"img","src":"design/9r-dni-exterior.png","label":"DNI · ticket de entrada (anverso)","section":"Entradas / DNI"},
       {"type":"img","src":"design/9r-dni-interior.png","label":"DNI · souvenir (reverso)","section":"Entradas / DNI"},
       {"type":"pdf","src":"pdfs/9reinas-dni-entradas.pdf","label":"Layout impresión doble cara","cover":"design/9r-dni-exterior.png","section":"Entradas / DNI"},
-      {"type":"pdf","src":"pdfs/9r-afiche-final.pdf","label":"Afiche final","cover":"design/cov-9r-afiche.png","section":"Afiches"}
+      {"type":"pdf","src":"pdfs/9r-afiche-final.pdf","label":"Afiche final","cover":"design/9r-afiche-cover.jpg","section":"Afiches"}
     ]
   },
   {
@@ -1440,7 +1440,7 @@
     "featureKoizone":true,
     "desc":{"es":"Revista experimental Koizone. Tratamiento tipográfico contemporáneo, ritmo de página y construcción de sistema editorial. Incluye mockup de portada, carátula de sección, tapas en serie, grillas internas y la revista completa para leer en pantalla.","en":"Experimental Koizone magazine. Contemporary typographic treatment and editorial system. Full magazine readable on screen.","pt":"Revista experimental Koizone."},
     "assets":[
-      {"type":"pdf","src":"pdfs/koizone-revista.pdf","label":"Leer revista completa","cover":"design/koizone-caratula-seccion.png","section":"Leer revista","coverAlone":true},
+      {"type":"pdf","src":"pdfs/koizone-revista.pdf","label":"Leer revista completa","cover":"design/koizone-cover.jpg","section":"Leer revista","coverAlone":true},
       {"type":"img","src":"design/koizone-caratula-seccion.png","label":"Mockup de portada","section":"Mockups"},
       {"type":"img","src":"design/koizone-mockup-2.png","label":"Portada — Serie 02","section":"Mockups"},
       {"type":"img","src":"design/koizone-tapas.png","label":"Tapas — Serie completa","section":"Mockups"},
@@ -1689,13 +1689,11 @@ function PdfThumb({ src, fallback, className, alt }) {
 
   useEffect(() => {
     if (__pdfThumbCache[src]) {setDataUrl(__pdfThumbCache[src]);return;}
-    // SOLO EN MOBILE: si hay portada estática, la usamos y NO abrimos el PDF para la
-    // miniatura. (Abrir varios documentos PDF a la vez al entrar a la sección reventaba
-    // la memoria en iOS Safari → "ocurrió un problema varias veces". El PDF recién se
-    // carga cuando el usuario abre el lector.) En DESKTOP sí renderizamos la 1ª página
-    // real del PDF: es la portada correcta y no hay problema de memoria.
-    var __thumbMobile = (typeof window !== 'undefined' && window.innerWidth <= 980);
-    if (fallback && __thumbMobile) {return;}
+    // Si hay portada estática, la usamos directamente y NO abrimos el PDF para la
+    // miniatura. Las portadas correctas (afiche, tapa de Koizone, etc.) ya están
+    // generadas como imagen, así que rasterizar el PDF sería lento, pesado (Koizone
+    // son 16MB con imágenes de 17 megapíxeles) y en iOS reventaba la memoria.
+    if (fallback) {return;}
     // En file:// (zip descargado, abierto local) pdf.js no puede fetchar los PDFs.
     // Usamos directamente la imagen de portada estática.
     if (window.__IS_FILE_PROTOCOL) {setErrored(true);return;}
@@ -2549,7 +2547,7 @@ function DesignSection({ lang, onOpenProject, onSwitchView }) {  const t = I18N[
           {/* Big "Abrir revista" — flipbook entry */}
           <button type="button" className="pj-koizone-flip" onClick={(e) => { e.stopPropagation(); onOpenProject(p, pdfIdx); }}>
             <div className="pj-koizone-flip-cover">
-              {pdf && <PdfThumb src={pdf.src} fallback="design/koizone-mockup-2.png" alt="Koizone" />}
+              {pdf && <PdfThumb src={pdf.src} fallback="design/koizone-cover.jpg" alt="Koizone" />}
             </div>
             <div className="pj-koizone-flip-cta">
               <span className="eye">01 / Revista</span>
@@ -2625,8 +2623,8 @@ function DesignSection({ lang, onOpenProject, onSwitchView }) {  const t = I18N[
           <div className="pj-9r-afiche" onClick={(e) => { e.stopPropagation(); onOpenProject(p, Math.max(0, sectionFirstIdx('Afiches'))); }}>
             <span className="pj-9r-afiche-tag">Afiche principal</span>
             {afichePdf
-              ? <PdfThumb src={afichePdf} fallback="design/cov-9r-afiche.png" alt="Afiche" />
-              : <img src="design/cov-9r-afiche.png" alt="Afiche" />}
+              ? <PdfThumb src={afichePdf} fallback="design/9r-afiche-cover.jpg" alt="Afiche" />
+              : <img src="design/9r-afiche-cover.jpg" alt="Afiche" />}
           </div>
           {/* LISTA VERTICAL — Tesis-style */}
           <div className="pj-9r-list">
