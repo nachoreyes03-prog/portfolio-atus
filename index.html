@@ -23,7 +23,15 @@
      igual que online, sin el visor nativo del navegador.
      (Fuentes / React / pdf.js vienen de CDN → requieren internet.) */
   window.__IS_FILE_PROTOCOL = false;            // siempre el lector pdf.js, nunca el <iframe>
-  window.__pdfManifest = {"pdfs/9r-afiche-final.pdf":["pdfdata/0_0.js"],"pdfs/9r-concepto.pdf":["pdfdata/1_0.js"],"pdfs/9reinas-caja.pdf":["pdfdata/5_0.js"],"pdfs/9reinas-cartas-dorso.pdf":["pdfdata/6_0.js"],"pdfs/9reinas-dni-entradas.pdf":["pdfdata/7_0.js"],"pdfs/9r-pressbook-1.pdf":["pdfdata/2_0.js"],"pdfs/9r-pressbook-2.pdf":["pdfdata/3_0.js"],"pdfs/9r-pressbook-3.pdf":["pdfdata/4_0.js","pdfdata/4_1.js"],"pdfs/koizone-revista.pdf":["pdfdata/8_0.js","pdfdata/8_1.js"],"pdfs/spiderman-arq.pdf":["pdfdata/9_0.js","pdfdata/9_1.js","pdfdata/9_2.js"]};
+  window.__pdfManifestFull = {"pdfs/9r-afiche-final.pdf":["pdfdata/0_0.js"],"pdfs/9r-concepto.pdf":["pdfdata/1_0.js"],"pdfs/9reinas-caja.pdf":["pdfdata/5_0.js"],"pdfs/9reinas-cartas-dorso.pdf":["pdfdata/6_0.js"],"pdfs/9reinas-dni-entradas.pdf":["pdfdata/7_0.js"],"pdfs/9r-pressbook-1.pdf":["pdfdata/2_0.js"],"pdfs/9r-pressbook-2.pdf":["pdfdata/3_0.js"],"pdfs/9r-pressbook-3.pdf":["pdfdata/4_0.js","pdfdata/4_1.js"],"pdfs/koizone-revista.pdf":["pdfdata/8_0.js","pdfdata/8_1.js"],"pdfs/spiderman-arq.pdf":["pdfdata/9_0.js","pdfdata/9_1.js","pdfdata/9_2.js"]};
+  /* ONLINE (http/https): dejamos el manifest VACÍO para que pdf.js lea los PDFs
+     reales por URL (pdfs/*.pdf) con streaming/range requests — usa MUY poca memoria
+     y NO crashea iOS Safari. Antes, decodificar 15–45MB de base64 de golpe disparaba
+     el aviso "se recargó porque usaba memoria significativa" → te tiraba a Home, y el
+     fallback iframe apuntaba a un PDF inexistente (404).
+     OFFLINE (file://): no se puede hacer fetch de file://, así que ahí sí usamos el
+     base64 embebido (pdfdata/*.js). */
+  window.__pdfManifest = (location.protocol === 'file:') ? window.__pdfManifestFull : {};
   window.__pdfData = {};                          // src -> base64 ensamblado
   window.__pdfParts = {};                          // src -> base64 acumulándose
   window.__pdfPending = {};                        // src -> [resolvers]
