@@ -8,8 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<!-- Builds de PRODUCCIÓN de React: bastante menos memoria/CPU que las dev,
+     clave para que iOS Safari no se quede sin memoria. -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
@@ -1675,6 +1677,11 @@ function PdfThumb({ src, fallback, className, alt }) {
 
   useEffect(() => {
     if (__pdfThumbCache[src]) {setDataUrl(__pdfThumbCache[src]);return;}
+    // Si hay portada estática, la usamos y NO abrimos el PDF para la miniatura.
+    // (Abrir 5 documentos PDF a la vez al entrar a la sección reventaba la memoria
+    //  en iOS Safari → "ocurrió un problema varias veces". El PDF recién se carga
+    //  cuando el usuario abre el lector.)
+    if (fallback) {return;}
     // En file:// (zip descargado, abierto local) pdf.js no puede fetchar los PDFs.
     // Usamos directamente la imagen de portada estática.
     if (window.__IS_FILE_PROTOCOL) {setErrored(true);return;}
