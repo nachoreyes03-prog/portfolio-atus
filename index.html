@@ -1192,6 +1192,13 @@
     .pj-3d{padding:64px 0 56px;gap:20px}
     .pj-3d-head{grid-template-columns:1fr;gap:10px;align-items:start}
     .pj-3d-main-h{font-size:clamp(28px,7vw,44px);margin:6px 0}
+
+    /* ── Barra "Volver a inicio" en mobile: padding más chico, el botón no se
+       aplasta (flex-shrink:0 + nowrap) y la etiqueta de la derecha no se le pega ── */
+    .section-view-bar{padding:12px 22px;gap:16px;margin-top:56px}
+    .section-view-bar button{flex-shrink:0;white-space:nowrap;padding:9px 12px}
+    .section-view-bar button span{white-space:nowrap}
+    .section-view-bar .label-r{text-align:right;line-height:1.35}
   }
   @media (max-width:540px){
     .grid{grid-template-columns:repeat(2,1fr);gap:12px}
@@ -1244,6 +1251,31 @@
     /* ── 3D small phone ── */
     .pj-3d-hero-label{padding:18px}
     .pj-3d-main-h{font-size:clamp(26px,8vw,38px)}
+
+    /* ── Barra "Volver a inicio" en teléfonos chicos: apilada para que el botón
+       y la etiqueta no se choquen ── */
+    .section-view-bar{flex-direction:column;align-items:flex-start;gap:8px;padding:12px 18px}
+    .section-view-bar .label-r{text-align:left}
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     FIX WebKit / Safari (iOS + macOS): las cajas de imagen con aspect-ratio
+     que contienen un <img width:100%;height:100%> entraban en un loop de
+     layout y CRECÍAN sin límite al scrollear (peor con loading="lazy", como
+     en Gorillaz), llegando a cubrir/romper la página. Sacar la imagen del
+     flujo con position:absolute corta ese loop: la caja conserva su tamaño
+     por aspect-ratio y object-fit mantiene el encuadre y el centrado igual.
+     Sólo afecta cajas de imagen única (la leyenda va como hermana, no encima). */
+  .pj-img, .se-feature-img, .gcard-img, .pj-poster-mini-img, .pj-tesis-piece-img,
+  .pdf-page-card-img, .pj-gorillaz-pair-img, .pj-koizone-tile-img,
+  .pj-gorillaz-block-img, .pj-gorillaz-version-img, .about-r,
+  .pj-9r-section-cover { position: relative; }
+
+  .pj-img > img, .se-feature-img > img, .gcard-img > img, .pj-poster-mini-img > img,
+  .pj-tesis-piece-img > img, .pdf-page-card-img > img, .pj-gorillaz-pair-img > img,
+  .pj-koizone-tile-img > img, .pj-gorillaz-block-img > img,
+  .pj-gorillaz-version-img > img, .about-r > img, .pj-9r-section-cover > img {
+    position: absolute; inset: 0;
   }
 </style>
 </head>
