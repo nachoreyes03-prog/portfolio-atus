@@ -1065,25 +1065,20 @@
     .nav.menu-open .nav-mid{display:flex;flex-direction:column;gap:18px;position:absolute;top:100%;left:0;right:0;background:var(--ink);border-bottom:1px solid rgba(244,242,236,.12);padding:22px}
     .nav.menu-open .nav-right{width:100%;padding:0 22px 18px}
     .nav.menu-open .nav-right .lang-btn{display:inline-flex}
-    .hero{padding:88px 0 44px;min-height:auto;gap:16px}
-    /* Tope del hero más compacto para que las dos tarjetas entren en la 1ª pantalla */
-    .hero-landing{min-height:auto;gap:6px}
-    .hero-eyebrow{margin-bottom:20px}
-    .hero-logo{max-width:84vw;max-height:26vh}
+    .hero{padding:120px 0 64px;min-height:auto;gap:32px}
     /* El padding lateral de 40px del hero-main desbordaba en pantallas chicas */
-    .hero-landing .hero-main{padding:0 22px 4px}
+    .hero-landing .hero-main{padding:0 22px 6px}
     /* hero-top: que envuelva en vez de empujar el ancho de la página */
     .hero-top{flex-wrap:wrap;gap:4px 12px}
-    /* Tarjetas "Diseño / Ilustración": LADO A LADO (las dos visibles juntas).
-       minmax(0,1fr) + min-width:0 dejan que cada columna se achique → nada se
-       corta (el desborde ya está controlado). Títulos alineados: flujo desde
-       arriba, eyebrow con alto fijo (2 líneas) y la meta pegada abajo. */
-    .hero-section-cards{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-    .hero-card{min-width:0;min-height:0;padding:16px 14px 14px;justify-content:flex-start;gap:8px}
-    .hero-card-design{border-right:1px solid var(--ink)}
-    .hero-card-k{min-height:2.7em}
-    .hero-card-title{margin-top:0;font-size:clamp(17px,4.8vw,26px);overflow-wrap:break-word}
-    .hero-card-meta{margin-top:auto}
+    /* Tarjetas "Diseño / Ilustración": en mobile, lado a lado, "Ilustración"
+       (palabra larga) + padding no entraba en media pantalla → la columna 1fr
+       se negaba a achicarse y ensanchaba TODA la página (margen raro en footer,
+       flecha cortada, sensación de zoom). Apiladas a 1 columna entran completas,
+       quedan alineadas y nada desborda. */
+    .hero-section-cards{grid-template-columns:1fr}
+    .hero-card{min-width:0;min-height:auto;padding:24px 22px}
+    .hero-card-design{border-right:none}
+    .hero-card-title{overflow-wrap:break-word}
     .hero-ctas{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
     .hero-ctas > *{min-width:0}
     .sec{padding:80px 0}
@@ -1242,13 +1237,8 @@
   @media (max-width:540px){
     .grid{grid-template-columns:repeat(2,1fr);gap:12px}
     .comic-pages{grid-template-columns:repeat(2,1fr);gap:12px}
-    /* Logo más compacto en teléfonos para que las dos tarjetas entren en pantalla */
-    .hero-logo{max-width:88vw;max-height:24vh}
+    .hero-logo{max-width:88vw;max-height:38vh}
     .hero-top,.hero-bot{font-size:10px;gap:8px}
-    /* Etiqueta superior de cada tarjeta más chica para que no empuje al título */
-    .hero-card-k{font-size:9.5px;letter-spacing:.16em;min-height:2.7em}
-    .hero-card-meta{font-size:9.5px;letter-spacing:.12em;gap:8px}
-    .hero-card-arr{font-size:16px}
     .about-stat:nth-child(even){padding-left:0;border-left:none}
     .about-stat:nth-child(odd){padding-right:0}
     .se-huh,.se-row-3,.se-triptych{grid-template-columns:repeat(2,1fr);gap:10px}
