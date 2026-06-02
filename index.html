@@ -876,7 +876,7 @@
   .modal-img-col video{width:100%;height:auto}
   .modal-img-col iframe{width:100%;height:92vh;max-height:92vh;border:none;background:#fff}
   .modal-mini{position:absolute;bottom:16px;left:16px;display:flex;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;z-index:3}
-  .modal-mini button{background:var(--ink);color:var(--paper);border:none;padding:9px 12px;font-size:inherit;font-family:inherit;letter-spacing:inherit;cursor:pointer;text-transform:uppercase}
+  .modal-mini button{background:var(--ink);color:var(--paper);border:none;padding:9px 12px;font-size:inherit;font-family:inherit;letter-spacing:inherit;cursor:pointer;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px}
   .modal-mini button:hover{background:var(--mute)}
   .modal-mini .counter{background:rgba(244,242,236,.94);color:var(--ink);padding:9px 12px}
   /* La nav de ASSETS (modal-mini) se superpone con los controles de PÁGINA del lector PDF.
@@ -1124,8 +1124,13 @@
     /* PDF reader en mobile: ocupa toda la pantalla y NO comparte columna con la info */
     .modal-inner:has(.pdf-reader){max-height:96vh;height:96vh;overflow:hidden;grid-template-columns:1fr;grid-template-rows:1fr}
     .modal-inner:has(.pdf-reader) .modal-info{display:none}
-    /* La nav de ASSETS (modal-mini) en mobile: arriba-izquierda para no pisar los controles de página del lector */
-    .modal-mini-pdf{top:12px;bottom:auto;left:12px}
+    /* La nav de ASSETS (modal-mini) en mobile: barra de arriba acotada para NO pisar el
+       botón de cerrar (right:62px), botones sólo flecha (← →) y el contador "Leer
+       revista · 1/6" en UNA línea (sin cortarse ni partir en dos). */
+    .modal-mini-pdf{top:12px;bottom:auto;left:12px;right:62px;gap:5px;align-items:center}
+    .modal-mini-pdf .mm-label{display:none}
+    .modal-mini-pdf button{padding:9px 11px;flex-shrink:0}
+    .modal-mini-pdf .counter{white-space:nowrap;font-size:10px;letter-spacing:.1em}
     .modal-img-col:has(.pdf-reader){min-height:0;max-height:96vh;height:96vh}
     .modal-img-col .pdf-reader{height:96vh}
     .modal-img-col .pdf-canvas{max-height:calc(96vh - 172px)}
@@ -1840,27 +1845,6 @@ function PdfReader({ src, cover, altVersion, onToggleVersion, hasAlt, skipPages,
     );
   }
 
-  // En MOBILE no rasterizamos con pdf.js: estos PDFs son de imprenta (imágenes de
-  // 9–17 megapíxeles por página) y decodificarlas a tamaño completo revienta la
-  // memoria de iOS Safari → cierra la pestaña. Mostramos la tapa y abrimos el PDF
-  // en el visor NATIVO del teléfono, que maneja documentos pesados sin problema.
-  // (En desktop, abajo, sí usamos el lector pdf.js completo con modo libro.)
-  if (typeof window !== 'undefined' && window.innerWidth <= 980) {
-    return (
-      <div className="pdf-reader pdf-reader-mobile">
-        <div className="pdf-stage" style={{ padding:'20px 18px', flexDirection:'column', gap:20, cursor:'default', textAlign:'center', justifyContent:'center', alignItems:'center' }}>
-          {cover && <img src={cover} alt="" style={{ maxHeight:'calc(96vh - 230px)', maxWidth:'100%', objectFit:'contain', boxShadow:'0 12px 44px rgba(0,0,0,.45)' }} />}
-          <a href={src} target="_blank" rel="noopener" style={{
-            display:'inline-flex', alignItems:'center', gap:10, background:'var(--paper)', color:'#0a0907',
-            border:'1px solid var(--paper)', padding:'15px 26px', fontFamily:"'JetBrains Mono',monospace",
-            fontSize:12, letterSpacing:'.2em', textTransform:'uppercase', fontWeight:700, textDecoration:'none'
-          }}>Abrir documento ↗</a>
-          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:10, letterSpacing:'.18em', textTransform:'uppercase', color:'rgba(244,242,236,.5)' }}>Se abre en el visor del teléfono</div>
-        </div>
-      </div>
-    );
-  }
-
   const skip = React.useMemo(() => new Set(skipPages || []), [skipPages]);
   const skipNext = (p, total) => { let n = p; while (n <= total && skip.has(n)) n++; return n; };
   const skipPrev = (p) => { let n = p; while (n >= 1 && skip.has(n)) n--; return n; };
@@ -1917,9 +1901,9 @@ function PdfReader({ src, cover, altVersion, onToggleVersion, hasAlt, skipPages,
       if (cancelled) return;
       const v1 = p.getViewport({ scale: 1 });
       // En mobile bajamos la resolución para no agotar la memoria del canvas (PDFs grandes
-      // como los pressbooks de 9 Reinas hacían fallar el render en celulares).
-      const isMobile = (typeof window !== 'undefined' && window.innerWidth <= 700);
-      const target = isMobile ? 900 : 1400;
+      // como los pressbooks de 9 Reinas / Koizone hacían fallar el render en celulares).
+      const isMobile = (typeof window !== 'undefined' && window.innerWidth <= 980);
+      const target = isMobile ? 820 : 1400;
       const scale = target / v1.width;
       const vp = p.getViewport({ scale });
       canvas.width = vp.width;
@@ -1930,6 +1914,10 @@ function PdfReader({ src, cover, altVersion, onToggleVersion, hasAlt, skipPages,
       const task = p.render({ canvasContext: ctx, viewport: vp });
       tasks.push(task);
       await task.promise;
+      // Liberar los recursos decodificados de la página (las imágenes de imprenta de
+      // 9–17 megapíxeles) apenas se pintó, para no acumular memoria al pasar páginas.
+      // Clave en iOS Safari, donde si no se agota la memoria y cierra la pestaña.
+      try { p.cleanup(); } catch (e) {}
     };
     (async () => {
       try {
@@ -3325,9 +3313,9 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
                /> : <img src={project.cover} alt={project.name} onClick={() => setImgZoom(z=>!z)} />}
           {total > 1 &&
           <div className={`modal-mini ${a && a.type === 'pdf' ? 'modal-mini-pdf' : ''}`}>
-              <button onClick={() => setI((x) => (x - 1 + total) % total)}>{tm.prev}</button>
+              <button onClick={() => setI((x) => (x - 1 + total) % total)} aria-label="Anterior"><span className="mm-arrow">←</span><span className="mm-label">{tm.prev.replace(/[←→]/g,'').trim()}</span></button>
               <span className="counter">{a && a.section ? `${a.section} · ` : ''}{i + 1} / {total}</span>
-              <button onClick={() => setI((x) => (x + 1) % total)}>{tm.next}</button>
+              <button onClick={() => setI((x) => (x + 1) % total)} aria-label="Siguiente"><span className="mm-label">{tm.next.replace(/[←→]/g,'').trim()}</span><span className="mm-arrow">→</span></button>
             </div>
           }
         </div>
