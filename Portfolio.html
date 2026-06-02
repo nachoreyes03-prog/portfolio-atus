@@ -1043,6 +1043,11 @@
     .nav-mid{display:none}
     .nav-burger{display:inline-flex}
     .nav-right .lang-btn{display:none}
+    /* En mobile .nav-mid (display:none) sale del grid y el auto-placement
+       corría .nav-right a la columna del medio (burger pegado al logo).
+       Lo anclamos a la 3ª columna para que el burger quede a la derecha. */
+    .nav-mark{grid-column:1}
+    .nav-right{grid-column:3;justify-self:end}
     .nav.menu-open .nav-mid{display:flex;flex-direction:column;gap:18px;position:absolute;top:100%;left:0;right:0;background:var(--ink);border-bottom:1px solid rgba(244,242,236,.12);padding:22px}
     .nav.menu-open .nav-right{width:100%;padding:0 22px 18px}
     .nav.menu-open .nav-right .lang-btn{display:inline-flex}
