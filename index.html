@@ -1842,6 +1842,27 @@ function PdfReader({ src, cover, altVersion, onToggleVersion, hasAlt, skipPages,
     );
   }
 
+  // En MOBILE no rasterizamos con pdf.js: estos PDFs son de imprenta (imágenes de
+  // 9–17 megapíxeles por página) y decodificarlas a tamaño completo revienta la
+  // memoria de iOS Safari → cierra la pestaña. Mostramos la tapa y abrimos el PDF
+  // en el visor NATIVO del teléfono, que maneja documentos pesados sin problema.
+  // (En desktop, abajo, sí usamos el lector pdf.js completo con modo libro.)
+  if (typeof window !== 'undefined' && window.innerWidth <= 980) {
+    return (
+      <div className="pdf-reader pdf-reader-mobile">
+        <div className="pdf-stage" style={{ padding:'20px 18px', flexDirection:'column', gap:20, cursor:'default', textAlign:'center', justifyContent:'center', alignItems:'center' }}>
+          {cover && <img src={cover} alt="" style={{ maxHeight:'calc(96vh - 230px)', maxWidth:'100%', objectFit:'contain', boxShadow:'0 12px 44px rgba(0,0,0,.45)' }} />}
+          <a href={src} target="_blank" rel="noopener" style={{
+            display:'inline-flex', alignItems:'center', gap:10, background:'var(--paper)', color:'#0a0907',
+            border:'1px solid var(--paper)', padding:'15px 26px', fontFamily:"'JetBrains Mono',monospace",
+            fontSize:12, letterSpacing:'.2em', textTransform:'uppercase', fontWeight:700, textDecoration:'none'
+          }}>Abrir documento ↗</a>
+          <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:10, letterSpacing:'.18em', textTransform:'uppercase', color:'rgba(244,242,236,.5)' }}>Se abre en el visor del teléfono</div>
+        </div>
+      </div>
+    );
+  }
+
   const skip = React.useMemo(() => new Set(skipPages || []), [skipPages]);
   const skipNext = (p, total) => { let n = p; while (n <= total && skip.has(n)) n++; return n; };
   const skipPrev = (p) => { let n = p; while (n >= 1 && skip.has(n)) n--; return n; };
