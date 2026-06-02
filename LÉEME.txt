@@ -1,0 +1,26 @@
+ATUS — Portfolio de Ignacio Reyes · versión offline
+====================================================
+
+CÓMO USARLO
+-----------
+1. Descomprimí TODO el .zip en una carpeta (no muevas archivos de lugar).
+2. Abrí "Portfolio.html" con doble clic (se abre en tu navegador).
+
+Mantené esta estructura junta:
+  Portfolio.html
+  /img        (ilustraciones + logo)
+  /design     (piezas de diseño)
+  /videos     (animaciones)
+  /pdfdata    (los PDFs editoriales, embebidos)
+
+QUÉ CAMBIÓ RESPECTO A LA DESCARGA ANTERIOR
+------------------------------------------
+Ahora los pressbooks / revistas / libros se abren con el MISMO lector
+editorial que ves online (páginas, modo libro, zoom) — ya no con el visor
+de PDF del navegador. Se ve y se navega igual que la web.
+
+REQUISITO
+---------
+Necesita conexión a internet la primera vez que lo abrís (las tipografías
+y librerías se cargan desde la nube). Las imágenes, videos y PDFs están
+incluidos en la carpeta y no dependen de internet.
