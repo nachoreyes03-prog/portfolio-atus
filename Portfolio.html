@@ -1131,6 +1131,9 @@
     .modal-mini-pdf .mm-label{display:none}
     .modal-mini-pdf button{padding:9px 11px;flex-shrink:0}
     .modal-mini-pdf .counter{white-space:nowrap;font-size:10px;letter-spacing:.1em}
+    /* En mobile el botón de SONIDO del video y la × de cerrar quedaban los dos arriba a
+       la derecha y se pisaban. Movemos el de sonido a la izquierda. */
+    .modal-img-col .av-mute:not(.anim-cover-mute){left:14px;right:auto}
     .modal-img-col:has(.pdf-reader){min-height:0;max-height:96vh;height:96vh}
     .modal-img-col .pdf-reader{height:96vh}
     .modal-img-col .pdf-canvas{max-height:calc(96vh - 172px)}
