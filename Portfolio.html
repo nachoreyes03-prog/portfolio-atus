@@ -3552,7 +3552,6 @@ function App() {
   const sectionBar = (kind) => (
     <div className={`section-view-bar ${kind === 'illu' ? 'dark' : ''}`}>
       <button onClick={() => setView('home')} aria-label="Volver a inicio"><span>← Volver</span><span style={{opacity:.6,marginLeft:'8px'}}>Inicio</span></button>
-      <span className="label-r">{kind === 'design' ? <><b>01</b> · Diseño Gráfico</> : <><b>02</b> · Ilustración</>}</span>
     </div>
   );
 
