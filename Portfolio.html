@@ -3177,8 +3177,10 @@ function Contact({ lang }) {
 
 function WorkModal({ idx, onClose, onPrev, onNext, lang }) {
   const t = I18N[lang].modal;
-  const [zoom, setZoom] = useState(false);
-  useEffect(() => { setZoom(false); }, [idx]);
+  const [imgFull, setImgFull] = useState(false);   // pieza en pantalla completa
+  // Cerramos pantalla completa al cerrar el modal, pero NO al pasar de pieza
+  // (así se puede navegar grande con las flechas).
+  useEffect(() => { if (idx === null || idx === undefined) setImgFull(false); }, [idx]);
   useEffect(() => {
     // Guard: only listen when modal is actually open
     if (idx === null || idx === undefined) return;
@@ -3202,9 +3204,9 @@ function WorkModal({ idx, onClose, onPrev, onNext, lang }) {
       {w &&
       <div className="modal-inner">
         <button className="modal-x" onClick={onClose} aria-label="Cerrar">×</button>
-          <div className={`modal-img-col ${w.tone === 'bw' ? 'bw' : ''} ${zoom ? 'zoomed' : ''}`}>
-            <button className="modal-zoom-btn" onClick={() => setZoom(z => !z)}>{zoom ? '− Zoom' : '+ Zoom'}</button>
-            <img src={w.src} alt={w.title} onClick={() => setZoom(z => !z)} />
+          <div className={`modal-img-col ${w.tone === 'bw' ? 'bw' : ''}`}>
+            <button className="modal-zoom-btn" onClick={() => setImgFull(true)} title="Ver en pantalla completa" aria-label="Ampliar"><span className="mz-ico">⛶</span><span className="mz-l">Ampliar</span></button>
+            <img src={w.src} alt={w.title} onClick={() => setImgFull(true)} style={{cursor:'zoom-in'}} />
             <div className="modal-mini">
               <button onClick={onPrev}>{t.prev}</button>
               <span className="counter">{idx + 1} / {WORKS.length}</span>
@@ -3225,6 +3227,15 @@ function WorkModal({ idx, onClose, onPrev, onNext, lang }) {
               <button onClick={onNext}>{t.next}</button>
             </div>
           </div>
+        </div>
+      }
+      {/* Pieza en PANTALLA COMPLETA (mismo comportamiento que en Diseño) */}
+      {w && imgFull &&
+        <div className="img-full" onClick={() => setImgFull(false)}>
+          <img src={w.src} alt={w.title} onClick={(e) => e.stopPropagation()} />
+          <button className="img-full-x" onClick={(e) => { e.stopPropagation(); setImgFull(false); }} aria-label="Cerrar">×</button>
+          <button className="img-full-nav img-full-prev" onClick={(e) => { e.stopPropagation(); onPrev(); }} aria-label="Anterior">‹</button>
+          <button className="img-full-nav img-full-next" onClick={(e) => { e.stopPropagation(); onNext(); }} aria-label="Siguiente">›</button>
         </div>
       }
     </div>);
