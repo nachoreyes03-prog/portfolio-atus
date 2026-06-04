@@ -839,6 +839,18 @@
   .modal-zoom-btn:hover{background:var(--paper);color:var(--ink);outline:1px solid var(--ink)}
   .modal-dark .modal-zoom-btn{background:#f4f2ec;color:#0a0907}
   .modal-dark .modal-zoom-btn:hover{background:#0a0907;color:#f4f2ec;outline:1px solid #f4f2ec}
+  .modal-zoom-btn .mz-ico{font-size:14px;line-height:1}
+
+  /* PANTALLA COMPLETA de una pieza — overlay sobre todo el viewport */
+  .img-full{position:fixed;inset:0;z-index:20000;background:rgba(10,9,7,.97);display:flex;align-items:center;justify-content:center;cursor:zoom-out;animation:imgFullIn .18s ease}
+  @keyframes imgFullIn{from{opacity:0}to{opacity:1}}
+  .img-full img{max-width:100vw;max-height:100vh;width:auto;height:auto;object-fit:contain;cursor:default;display:block}
+  .img-full-x{position:absolute;top:14px;right:14px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#f4f2ec;color:#0a0907;border:none;font-size:24px;line-height:1;cursor:pointer;z-index:2;font-family:'JetBrains Mono',monospace;transition:transform .15s}
+  .img-full-x:hover{transform:rotate(90deg)}
+  .img-full-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:66px;display:flex;align-items:center;justify-content:center;background:rgba(244,242,236,.92);color:#0a0907;border:none;font-size:30px;line-height:1;cursor:pointer;z-index:2}
+  .img-full-nav:hover{background:#f4f2ec}
+  .img-full-prev{left:8px}
+  .img-full-next{right:8px}
 
   /* Version toggle (Gorillaz Normal/Alt) in image-col */
   .modal-version-toggle{position:absolute;top:16px;left:130px;z-index:6;display:inline-flex;gap:0;border:1px solid var(--ink)}
@@ -2067,12 +2079,12 @@ function PdfReader({ src, cover, altVersion, onToggleVersion, hasAlt, skipPages,
 }
 
 // Asset viewer for modal main column
-function AssetView({ asset, onEnded, altVersion, onToggleVersion, hasAlt }) {
+function AssetView({ asset, onEnded, altVersion, onToggleVersion, hasAlt, onImgClick }) {
   const [muted, setMuted] = React.useState(true);
   const videoRef = React.useRef(null);
   React.useEffect(() => {setMuted(true);}, [asset && asset.src]);
   if (!asset) return null;
-  if (asset.type === 'img') return <img src={asset.src} alt={asset.label} />;
+  if (asset.type === 'img') return <img src={asset.src} alt={asset.label} onClick={onImgClick} style={onImgClick ? {cursor:'zoom-in'} : null} />;
   if (asset.type === 'pdf') return <PdfReader key={asset.src} src={asset.src} cover={asset.cover} altVersion={altVersion} onToggleVersion={onToggleVersion} hasAlt={hasAlt} skipPages={asset.skipPages} coverAlone={asset.coverAlone} />;
   if (asset.type === 'video') {
     return (
@@ -3223,11 +3235,13 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
   const t = I18N[lang].design;
   const tm = I18N[lang].modal;
   const [i, setI] = useState(0);
-  const [imgZoom, setImgZoom] = useState(false);
+  const [imgFull, setImgFull] = useState(false);   // ver la pieza en pantalla completa
   const [altVersion, setAltVersion] = useState(false);
   const infoRef = React.useRef(null);
   useEffect(() => {setI(startIdx || 0);}, [project, startIdx]);
-  useEffect(() => {setImgZoom(false);}, [i, project]);
+  // Reset al cambiar de proyecto (NO al cambiar de pieza, para poder pasar piezas
+  // sin salir de pantalla completa).
+  useEffect(() => {setImgFull(false);}, [project]);
   useEffect(() => {setAltVersion(false);}, [project]);
   useEffect(() => {
     if (!project) return;
@@ -3292,13 +3306,30 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
   return (
     <div className="modal open"
     onClick={(e) => {if (e.target.classList.contains('modal')) onClose();}}>
+      {/* Ver la pieza en PANTALLA COMPLETA: overlay que ocupa todo el viewport con
+          la imagen grande y fondo oscuro, sólo con cerrar + flechas. Soluciona que
+          en mobile los botones del modal tapen la pieza. */}
+      {imgFull && a && a.type === 'img' &&
+        <div className="img-full" onClick={() => setImgFull(false)}>
+          <img src={a.src} alt={a.label || project.name}
+               style={altVersion && project.alt ? { filter: project.alt.filter } : null}
+               onClick={(e) => e.stopPropagation()} />
+          <button className="img-full-x" onClick={(e) => { e.stopPropagation(); setImgFull(false); }} aria-label="Cerrar">×</button>
+          {total > 1 &&
+            <>
+              <button className="img-full-nav img-full-prev" onClick={(e) => { e.stopPropagation(); setI((x) => (x - 1 + total) % total); }} aria-label="Anterior">‹</button>
+              <button className="img-full-nav img-full-next" onClick={(e) => { e.stopPropagation(); setI((x) => (x + 1) % total); }} aria-label="Siguiente">›</button>
+            </>
+          }
+        </div>
+      }
       <div className={`modal-inner`}>
         <button className="modal-x" onClick={onClose} aria-label="Cerrar">×</button>
-        <div className={`modal-img-col ${imgZoom && a && a.type==='img' ? 'zoomed' : ''}`}
+        <div className="modal-img-col"
              style={altVersion && project.alt && a && a.type==='img' ? { filter: project.alt.filter } : null}>
           {a && a.type === 'img' &&
-            <button className="modal-zoom-btn" onClick={() => setImgZoom(z => !z)} title="Zoom">
-              {imgZoom ? '− Zoom' : '+ Zoom'}
+            <button className="modal-zoom-btn" onClick={() => setImgFull(true)} title="Ver en pantalla completa" aria-label="Ampliar">
+              <span className="mz-ico">⛶</span><span className="mz-l">Ampliar</span>
             </button>
           }
           {project.alt && a && a.type === 'img' &&
@@ -3313,7 +3344,8 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
                   altVersion={altVersion}
                   onToggleVersion={setAltVersion}
                   hasAlt={!!project.alt && a.type === 'pdf'}
-               /> : <img src={project.cover} alt={project.name} onClick={() => setImgZoom(z=>!z)} />}
+                  onImgClick={() => setImgFull(true)}
+               /> : <img src={project.cover} alt={project.name} onClick={() => setImgFull(true)} style={{cursor:'zoom-in'}} />}
           {total > 1 &&
           <div className={`modal-mini ${a && a.type === 'pdf' ? 'modal-mini-pdf' : ''}`}>
               <button onClick={() => setI((x) => (x - 1 + total) % total)} aria-label="Anterior"><span className="mm-arrow">←</span><span className="mm-label">{tm.prev.replace(/[←→]/g,'').trim()}</span></button>
