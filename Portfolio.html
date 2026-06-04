@@ -3477,8 +3477,11 @@ function App() {
     // Run preloads SERIALLY and only after the page is fully idle (3s grace)
     const start = setTimeout(async () => {
       if (cancelled) return;
-      // 1) PDFs — one at a time, sleep between
-      if (window.pdfjsLib) {
+      // 1) PDFs — one at a time, sleep between. En MOBILE no los precargamos: son
+      //    archivos pesados (hasta 24MB) que competirían con las imágenes y gastarían
+      //    datos del usuario; el PDF se carga igual al abrir el lector.
+      const __preloadMobile = (typeof window !== 'undefined' && window.innerWidth <= 980);
+      if (!__preloadMobile && window.pdfjsLib) {
         for (const src of uniqPdfs) {
           if (cancelled) return;
           try {
@@ -3505,6 +3508,32 @@ function App() {
 
     return () => { cancelled = true; clearTimeout(start); };
   }, []);
+
+  // ── Precarga de IMÁGENES de la vista actual, en orden de arriba hacia abajo ──
+  // Apenas se monta una sección, vamos cargando sus imágenes (en orden del DOM, o
+  // sea de arriba hacia abajo) de a varias a la vez, SIN bloquear el render. Así,
+  // cuando el usuario scrollea, las imágenes ya están en caché y aparecen al
+  // instante en vez de mostrar bloques negros esperando.
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      if (cancelled) return;
+      const seen = new Set();
+      const urls = Array.from(document.querySelectorAll('#app img'))
+        .map((im) => im.getAttribute('src'))
+        .filter((s) => s && !s.startsWith('data:') && !seen.has(s) && seen.add(s));
+      let i = 0;
+      const CONC = 5;                       // 5 imágenes a la vez, en orden
+      const next = () => {
+        if (cancelled || i >= urls.length) return;
+        const pre = new Image();
+        pre.onload = pre.onerror = () => { if (!cancelled) next(); };
+        pre.src = urls[i++];
+      };
+      for (let k = 0; k < CONC; k++) next();
+    }, 350);                                // 350ms: deja renderizar la sección primero
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [view]);
 
   const setLang = (l) => {setLangState(l);localStorage.setItem('atus_lang', l);};
   useEffect(() => {document.documentElement.lang = lang;}, [lang]);
