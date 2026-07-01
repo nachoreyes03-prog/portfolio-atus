@@ -1058,6 +1058,152 @@ function TesisAccordion({
     }, "Abrir en lector \u2192"))));
   }));
 }
+
+// ── Destacado de Tesis: card que, en hover (desktop) / touch (mobile), se blurea
+//    y muestra una card de info; al abrir, se transforma IN-PLACE en un panel con
+//    la info de la tesis + el acordeón de subsecciones (sin scroll ni modal). ──
+function TesisFeatured({
+  f,
+  lang,
+  onOpenProject
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [peek, setPeek] = React.useState(false);
+  const isTouch = React.useMemo(() => !!(window.matchMedia && window.matchMedia('(hover: none)').matches), []);
+  const fcover = f.cover && !f.cover.startsWith('PDF:') && !f.cover.endsWith('.mp4') ? f.cover : f.assets && f.assets[0] && f.assets[0].cover || '';
+  const desc = f.desc && f.desc[lang] || '';
+  const sections = f.tesisSections || [];
+  const counts = {};
+  (f.assets || []).forEach(a => {
+    const k = a.section || '';
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  const idToLabel = {
+    'sis-a': 'Sistema A',
+    'sis-b': 'Sistema B',
+    'sis-c': 'Sistema C',
+    'interior': 'Propuesta Interior',
+    'exterior': 'Propuesta Exterior'
+  };
+  const all = [...sections.filter(s => s.kind === 'system'), ...sections.filter(s => s.kind === 'propuesta')];
+  const openPanel = e => {
+    if (e) e.stopPropagation();
+    setPeek(false);
+    setOpen(true);
+  };
+  if (open) {
+    return /*#__PURE__*/React.createElement("section", {
+      className: "tesis-panel"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "tesis-panel-bar"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "tesis-panel-eye"
+    }, "\u2605 Proyecto destacado \xB7 ", f.year), /*#__PURE__*/React.createElement("button", {
+      className: "tesis-panel-close",
+      onClick: () => setOpen(false),
+      "aria-label": "Cerrar panel"
+    }, "Cerrar \u2715")), /*#__PURE__*/React.createElement("div", {
+      className: "tesis-panel-top"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "tesis-panel-media"
+    }, fcover ? /*#__PURE__*/React.createElement("img", {
+      src: fcover,
+      alt: f.name,
+      loading: "lazy"
+    }) : /*#__PURE__*/React.createElement("div", {
+      className: "dg-featured-ph"
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "tesis-panel-info"
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: "tesis-panel-name"
+    }, f.name), /*#__PURE__*/React.createElement("p", {
+      className: "tesis-panel-desc"
+    }, desc), /*#__PURE__*/React.createElement("div", {
+      className: "tesis-panel-meta"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      className: "lab"
+    }, "Categor\xEDa"), /*#__PURE__*/React.createElement("span", {
+      className: "val"
+    }, f.cat)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      className: "lab"
+    }, "A\xF1o"), /*#__PURE__*/React.createElement("span", {
+      className: "val"
+    }, f.year)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      className: "lab"
+    }, "Rol"), /*#__PURE__*/React.createElement("span", {
+      className: "val"
+    }, f.role))))), /*#__PURE__*/React.createElement("div", {
+      className: "tesis-panel-subhead"
+    }, /*#__PURE__*/React.createElement("span", null, "\u21B3 Subsecciones"), /*#__PURE__*/React.createElement("span", {
+      className: "tesis-panel-subhead-n"
+    }, all.length, " bloques \xB7 despleg\xE1 para ver las piezas")), /*#__PURE__*/React.createElement(TesisAccordion, {
+      sections: all,
+      idToLabel: idToLabel,
+      counts: counts,
+      project: f,
+      onOpenProject: onOpenProject
+    }));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: `dg-featured tesis-featured ${peek ? 'peek' : ''}`,
+    role: "button",
+    tabIndex: 0,
+    onMouseEnter: isTouch ? undefined : () => setPeek(true),
+    onMouseLeave: isTouch ? undefined : () => setPeek(false),
+    onClick: () => {
+      if (isTouch && !peek) setPeek(true);else openPanel();
+    },
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openPanel();
+      }
+    },
+    "aria-label": `Ver ${f.name}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dg-featured-media"
+  }, fcover ? /*#__PURE__*/React.createElement("img", {
+    src: fcover,
+    alt: f.name
+  }) : /*#__PURE__*/React.createElement("div", {
+    className: "dg-featured-ph"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "dg-featured-badge"
+  }, "\u2605 Destacado"), /*#__PURE__*/React.createElement("div", {
+    className: "tesis-peek",
+    "aria-hidden": !peek
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tesis-peek-inner"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tesis-peek-eye"
+  }, "Tesis de grado \xB7 ", f.year), /*#__PURE__*/React.createElement("p", {
+    className: "tesis-peek-desc"
+  }, desc), /*#__PURE__*/React.createElement("button", {
+    className: "tesis-peek-btn",
+    onClick: openPanel
+  }, "Explorar subsecciones ", /*#__PURE__*/React.createElement("span", {
+    className: "arr"
+  }, "\u2192"))))), /*#__PURE__*/React.createElement("div", {
+    className: "dg-featured-info"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dg-featured-eye"
+  }, "Proyecto destacado \xB7 ", f.year), /*#__PURE__*/React.createElement("h3", {
+    className: "dg-featured-name"
+  }, f.name), /*#__PURE__*/React.createElement("p", {
+    className: "dg-featured-cat"
+  }, f.cat), /*#__PURE__*/React.createElement("span", {
+    className: "dg-featured-cta"
+  }, "Ver subsecciones ", /*#__PURE__*/React.createElement("span", {
+    className: "arr"
+  }, "\u2192")), /*#__PURE__*/React.createElement("div", {
+    className: "tesis-hover-logo",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: "design/tesis/museo-logo-white.png",
+    alt: "",
+    loading: "lazy"
+  }))));
+}
 function GorillazSimple({
   p,
   num,
@@ -1738,45 +1884,11 @@ function DesignSection({
     }, "Concepto y propuesta de redise\xF1o de identidad y comunicaci\xF3n para el ", /*#__PURE__*/React.createElement("b", null, "Palacio del Agua"), " (Palacio Hist\xF3rico Sanitario de AySA, Riobamba 750, CABA) como Museo del Agua."), /*#__PURE__*/React.createElement("div", {
       className: "pj-tesis-slug-r"
     }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, tp.assets.length), " piezas"), /*#__PURE__*/React.createElement("span", null, "\xB7"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, "5"), " bloques"), /*#__PURE__*/React.createElement("span", null, "\xB7"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, tp.year))));
-  })(), filter === 'all' && (() => {
-    const f = DESIGN[0];
-    const fcover = f.cover && !f.cover.startsWith('PDF:') && !f.cover.endsWith('.mp4') ? f.cover : f.assets && f.assets[0] && f.assets[0].cover || '';
-    // La Tesis abría un modal muy compacto → mejor scrollear a su caja
-    // original (accordion con acceso a las subsecciones), que sigue en la lista.
-    const openFeatured = () => {
-      const box = document.querySelector('.pj-tesis');
-      if (box) box.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });else onOpenProject(f);
-    };
-    return /*#__PURE__*/React.createElement("button", {
-      className: "dg-featured",
-      onClick: openFeatured,
-      "aria-label": `Ver ${f.name}`
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "dg-featured-media"
-    }, fcover ? /*#__PURE__*/React.createElement("img", {
-      src: fcover,
-      alt: f.name
-    }) : /*#__PURE__*/React.createElement("div", {
-      className: "dg-featured-ph"
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "dg-featured-badge"
-    }, "\u2605 Destacado")), /*#__PURE__*/React.createElement("div", {
-      className: "dg-featured-info"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "dg-featured-eye"
-    }, "Proyecto destacado \xB7 ", f.year), /*#__PURE__*/React.createElement("h3", {
-      className: "dg-featured-name"
-    }, f.name), /*#__PURE__*/React.createElement("p", {
-      className: "dg-featured-cat"
-    }, f.cat), /*#__PURE__*/React.createElement("span", {
-      className: "dg-featured-cta"
-    }, "Ver subsecciones ", /*#__PURE__*/React.createElement("span", {
-      className: "arr"
-    }, "\u2193"))));
-  })(), filter === 'all' && renderTesisCard(DESIGN[0], '01', String(DESIGN.length).padStart(2, '0')), /*#__PURE__*/React.createElement("div", {
+  })(), filter === 'all' && /*#__PURE__*/React.createElement(TesisFeatured, {
+    f: DESIGN[0],
+    lang: lang,
+    onOpenProject: onOpenProject
+  }), /*#__PURE__*/React.createElement("div", {
     className: "illu-bar"
   }, /*#__PURE__*/React.createElement("div", {
     className: "filters"
@@ -2752,9 +2864,7 @@ function ProjectModal({
   }, hasSections && /*#__PURE__*/React.createElement("nav", {
     className: "modal-sec-nav",
     "aria-label": "Secciones del proyecto"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "modal-sec-nav-l"
-  }, "\u21B3 Saltar a secci\xF3n"), groups.map(g => /*#__PURE__*/React.createElement("button", {
+  }, groups.map(g => /*#__PURE__*/React.createElement("button", {
     key: g.label || '_',
     className: currentSection === g.label ? 'on' : '',
     onClick: () => jumpToSection(g.label)
@@ -2762,32 +2872,7 @@ function ProjectModal({
     className: "n"
   }, "(", g.items.length, ")")))), /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, /*#__PURE__*/React.createElement("span", null, project.cat), /*#__PURE__*/React.createElement("span", null, project.year)), /*#__PURE__*/React.createElement("h3", null, project.name), /*#__PURE__*/React.createElement("div", {
-    className: "meta"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "lab"
-  }, t.cat), /*#__PURE__*/React.createElement("div", {
-    className: "val",
-    style: {
-      textTransform: 'none'
-    }
-  }, project.cat)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "lab"
-  }, tm.year), /*#__PURE__*/React.createElement("div", {
-    className: "val"
-  }, project.year)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      gridColumn: 'span 2'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lab"
-  }, t.role), /*#__PURE__*/React.createElement("div", {
-    className: "val",
-    style: {
-      textTransform: 'none',
-      fontWeight: 600
-    }
-  }, project.role))), /*#__PURE__*/React.createElement("p", null, project.desc[lang]), project.pendingFig && /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("span", null, project.cat), /*#__PURE__*/React.createElement("span", null, project.year)), /*#__PURE__*/React.createElement("h3", null, project.name), /*#__PURE__*/React.createElement("p", null, project.desc[lang]), project.pendingFig && /*#__PURE__*/React.createElement("p", {
     style: {
       marginTop: 10,
       padding: '8px 10px',
@@ -2800,15 +2885,13 @@ function ProjectModal({
     }
   }, "\u26A0 ", tm.pendingNote), total > 0 && /*#__PURE__*/React.createElement("div", {
     className: "modal-thumbs"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "k"
-  }, a.label), groups.map((g, gi) => {
-    const showHeaders = hasSections;
+  }, groups.filter(g => !hasSections || g.label === currentSection).map(g => {
+    const gi = groups.indexOf(g);
     return /*#__PURE__*/React.createElement("div", {
       key: g.label || '_',
       className: "thumbs-section",
       "data-section-anchor": g.label || ''
-    }, showHeaders && g.label && /*#__PURE__*/React.createElement("div", {
+    }, hasSections && g.label && /*#__PURE__*/React.createElement("div", {
       className: "thumbs-section-h"
     }, /*#__PURE__*/React.createElement("span", {
       className: "h-l"
