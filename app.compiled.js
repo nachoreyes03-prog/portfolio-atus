@@ -2662,6 +2662,19 @@ function WorkModal({
     "aria-label": "Siguiente"
   }, "\u203A")));
 }
+
+// Orientación de una pieza (portrait/landscape). SINCRÓNICO si la imagen ya está en
+// caché → el modal abre directo al tamaño correcto, sin el salto "mediano → grande".
+function detectAssetOrient(asset) {
+  if (!asset) return 'landscape';
+  if (asset.type === 'pdf') return 'portrait';
+  if (asset.type === 'img') {
+    const im = new Image();
+    im.src = asset.src;
+    if (im.complete && im.naturalWidth) return im.naturalHeight > im.naturalWidth * 1.08 ? 'portrait' : 'landscape';
+  }
+  return 'landscape';
+}
 function ProjectModal({
   project,
   startIdx,
@@ -2673,6 +2686,7 @@ function ProjectModal({
   const [i, setI] = useState(0);
   const [imgFull, setImgFull] = useState(false); // ver la pieza en pantalla completa
   const [altVersion, setAltVersion] = useState(false);
+  const [orient, setOrient] = useState(() => detectAssetOrient(project && project.assets && project.assets[startIdx || 0]));
   const infoRef = React.useRef(null);
   useEffect(() => {
     setI(startIdx || 0);
@@ -2701,6 +2715,31 @@ function ProjectModal({
       document.body.style.overflow = '';
     };
   }, [project]);
+  // Detecta la orientación de la pieza actual (portrait/landscape) para adaptar el
+  // ancho del modal → menos variación entre piezas verticales vs horizontales.
+  useEffect(() => {
+    const asset = project && project.assets && project.assets[i];
+    if (!asset) return;
+    setOrient(detectAssetOrient(asset)); // inmediato (correcto si está cacheada o es PDF)
+    if (asset.type === 'pdf') return;
+    let cancelled = false;
+    const decide = (w, h) => {
+      if (!cancelled && w) setOrient(h > w * 1.08 ? 'portrait' : 'landscape');
+    };
+    if (asset.type === 'video') {
+      const v = document.createElement('video');
+      v.preload = 'metadata';
+      v.onloadedmetadata = () => decide(v.videoWidth, v.videoHeight);
+      v.src = asset.src;
+    } else {
+      const im = new Image();
+      im.onload = () => decide(im.naturalWidth, im.naturalHeight);
+      im.src = asset.src;
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [project, i]);
 
   // When startIdx changes (e.g. clicking a section card), scroll the info panel to that section header.
   // Skip when opening from the hero (startIdx === 0) — first section is already at the top.
@@ -2797,7 +2836,7 @@ function ProjectModal({
     },
     "aria-label": "Siguiente"
   }, "\u203A"))), /*#__PURE__*/React.createElement("div", {
-    className: `modal-inner`
+    className: `modal-inner mo-${orient} ${a && a.type === 'pdf' ? 'is-pdf' : ''}`
   }, /*#__PURE__*/React.createElement("button", {
     className: "modal-x",
     onClick: onClose,
@@ -2883,7 +2922,7 @@ function ProjectModal({
       letterSpacing: '.1em',
       textTransform: 'uppercase'
     }
-  }, "\u26A0 ", tm.pendingNote), total > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "\u26A0 ", tm.pendingNote), total > 1 && /*#__PURE__*/React.createElement("div", {
     className: "modal-thumbs"
   }, groups.filter(g => !hasSections || g.label === currentSection).map(g => {
     const gi = groups.indexOf(g);

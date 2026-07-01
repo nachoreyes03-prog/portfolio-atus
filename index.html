@@ -941,9 +941,11 @@
   .pdf-edge{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.18);width:44px;height:80px;font-size:32px;line-height:1;cursor:pointer;font-family:Georgia,serif;font-weight:300;transition:background .15s,color .15s;display:flex;align-items:center;justify-content:center;padding:0}
   .pdf-edge:hover:not(:disabled){background:rgba(255,255,255,.15);color:#fff}
   .pdf-edge:disabled{opacity:.15;cursor:not-allowed}
-  .pdf-edge-l{left:14px}
-  .pdf-edge-r{right:14px}
-  .pdf-controls{background:#0c0c0c;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;border-top:1px solid rgba(244,242,236,.16)}
+  .pdf-edge-l{left:26px}
+  .pdf-edge-r{right:26px}
+  .pdf-controls{background:#0c0c0c;padding:15px 22px 18px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px 14px;border-top:1px solid rgba(244,242,236,.16)}
+  /* Nada de texto partido a la mitad (ni "4 /" + "26", ni "← / Anterior"). */
+  .pdf-nav button,.pdf-info,.pdf-mode button,.pdf-zoom-btn{white-space:nowrap}
   .pdf-nav{display:flex;gap:6px}
   .pdf-nav button{background:transparent;color:var(--paper);border:1px solid rgba(244,242,236,.55);padding:9px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;cursor:pointer;transition:background .15s,color .15s}
   .pdf-nav button:hover:not(:disabled){background:var(--paper);color:var(--ink);border-color:var(--paper)}
@@ -998,7 +1000,7 @@
   .footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
 
   /* MODAL */
-  .modal{position:fixed;inset:0;background:rgba(10,10,10,.55);backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);z-index:10000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s,backdrop-filter .25s;padding:24px}
+  .modal{position:fixed;inset:0;background:rgba(10,10,10,.55);backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);z-index:10000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s,backdrop-filter .25s;padding:10px}
   .modal.open{opacity:1;pointer-events:auto}
 
   /* Zoom on demand — applied via .zoomed class to .modal-img-col */
@@ -1045,13 +1047,27 @@
   .pdf-canvas.alt-yellow{filter:sepia(.4) saturate(2.4) hue-rotate(20deg) brightness(1.05)}
 
   /* MODAL — old declarations below preserved */
-  .modal-inner{position:relative;background:var(--paper);width:min(1480px,100%);max-height:94vh;display:grid;grid-template-columns:1.4fr 0.6fr;overflow:hidden;transform:translateY(12px) scale(.985);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .modal-inner{position:relative;background:var(--paper);width:min(1480px,100%);max-height:98vh;display:grid;grid-template-columns:1.4fr 0.6fr;overflow:hidden;transform:translateY(12px) scale(.985);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
   .modal-inner.pdf-fullscreen{width:96vw;height:96vh;max-height:96vh;grid-template-columns:1fr}
   .modal-inner.pdf-fullscreen .modal-info{display:none}
   .modal-inner.pdf-fullscreen .modal-img-col{max-height:96vh;background:#0a0907}
   .modal-inner.pdf-fullscreen .pdf-reader{height:96vh}
   .modal-inner.pdf-fullscreen .pdf-canvas{max-height:calc(96vh - 100px)}
   .modal.open .modal-inner{transform:translateY(0) scale(1)}
+  /* Modal ADAPTATIVO por orientación del contenido → menos variación entre piezas:
+     - VERTICAL: modal más angosto → la imagen ocupa mejor, menos aire a los lados.
+     - HORIZONTAL: modal más ancho → la media queda más grande.
+     Todas las verticales comparten estructura, y todas las horizontales también. */
+  /* VERTICAL imagen (póster/tesis): panel derecho angosto → la imagen ocupa casi
+     todo, con muy poco aire a los lados. */
+  /* La columna de la imagen se AJUSTA al póster (auto) → sin aire a los lados, y
+     la imagen ocupa 97vh de alto (grande). El panel derecho queda angosto (312px). */
+  .modal-inner.mo-portrait{width:auto;max-width:min(1080px,96vw);grid-template-columns:auto 312px}
+  .modal-inner.mo-portrait .modal-img-col img{height:97vh;max-height:97vh;width:auto;max-width:64vw;object-fit:contain}
+  /* VERTICAL PDF (libro): necesita más ancho para que los controles entren en una
+     línea (y para el modo Libro). El panel derecho igual queda acotado. */
+  .modal-inner.mo-portrait.is-pdf{width:min(1340px,96vw);grid-template-columns:1.5fr 340px}
+  .modal-inner.mo-landscape{width:min(1640px,97vw);grid-template-columns:1.85fr 0.5fr}
   .modal-img-col{background:#fff;position:relative;min-height:420px;max-height:92vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .modal-img-col.bw img{filter:grayscale(1) contrast(1.18) brightness(1.06)}
   .modal-img-col img,.modal-img-col canvas,.modal-img-col video{max-width:100%;max-height:92vh;width:auto;height:auto;object-fit:contain;background:#fff}
@@ -1104,7 +1120,7 @@
   /* Tira horizontal de 1 fila (filmstrip): la cantidad de piezas ya no agranda el
      alto del panel → sin scroll vertical. Si hay muchas, se corren en horizontal. */
   .thumbs-strip{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding-bottom:6px;scrollbar-width:thin}
-  .thumb{flex:0 0 66px;width:66px;aspect-ratio:1;background:#fff;cursor:pointer;overflow:hidden;position:relative;transition:opacity .15s;opacity:.55}
+  .thumb{flex:0 0 84px;width:84px;aspect-ratio:1;background:#fff;cursor:pointer;overflow:hidden;position:relative;transition:opacity .15s;opacity:.55}
   .thumb:hover{opacity:1}
   .thumb.on{opacity:1;outline:2px solid var(--ink);outline-offset:-2px}
   .thumb img{width:100%;height:100%;object-fit:cover}
@@ -1314,6 +1330,9 @@
     .ci:last-child{border-bottom:none}
     .modal{padding:10px}
     .modal-inner{grid-template-columns:1fr;max-height:94vh;overflow-y:auto}
+    /* en mobile las clases de orientación stackean igual (1 columna) — incluida
+       la variante is-pdf, que si no mantenía 2 columnas por su mayor especificidad */
+    .modal-inner.mo-portrait,.modal-inner.mo-landscape,.modal-inner.mo-portrait.is-pdf{width:auto;max-width:100%;grid-template-columns:1fr}
     .modal-img-col{min-height:240px;max-height:50vh}
     .modal-img-col iframe{height:50vh}
     .modal-info{padding:24px 22px}
@@ -3823,12 +3842,25 @@ function WorkModal({ idx, onClose, onPrev, onNext, lang }) {
 
 }
 
+// Orientación de una pieza (portrait/landscape). SINCRÓNICO si la imagen ya está en
+// caché → el modal abre directo al tamaño correcto, sin el salto "mediano → grande".
+function detectAssetOrient(asset) {
+  if (!asset) return 'landscape';
+  if (asset.type === 'pdf') return 'portrait';
+  if (asset.type === 'img') {
+    const im = new Image();
+    im.src = asset.src;
+    if (im.complete && im.naturalWidth) return im.naturalHeight > im.naturalWidth * 1.08 ? 'portrait' : 'landscape';
+  }
+  return 'landscape';
+}
 function ProjectModal({ project, startIdx, onClose, lang }) {
   const t = I18N[lang].design;
   const tm = I18N[lang].modal;
   const [i, setI] = useState(0);
   const [imgFull, setImgFull] = useState(false);   // ver la pieza en pantalla completa
   const [altVersion, setAltVersion] = useState(false);
+  const [orient, setOrient] = useState(() => detectAssetOrient(project && project.assets && project.assets[startIdx || 0]));
   const infoRef = React.useRef(null);
   useEffect(() => {setI(startIdx || 0);}, [project, startIdx]);
   // Reset al cambiar de proyecto (NO al cambiar de pieza, para poder pasar piezas
@@ -3849,6 +3881,26 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
     document.body.style.overflow = project ? 'hidden' : '';
     return () => {document.body.style.overflow = '';};
   }, [project]);
+  // Detecta la orientación de la pieza actual (portrait/landscape) para adaptar el
+  // ancho del modal → menos variación entre piezas verticales vs horizontales.
+  useEffect(() => {
+    const asset = project && project.assets && project.assets[i];
+    if (!asset) return;
+    setOrient(detectAssetOrient(asset));   // inmediato (correcto si está cacheada o es PDF)
+    if (asset.type === 'pdf') return;
+    let cancelled = false;
+    const decide = (w, h) => { if (!cancelled && w) setOrient(h > w * 1.08 ? 'portrait' : 'landscape'); };
+    if (asset.type === 'video') {
+      const v = document.createElement('video'); v.preload = 'metadata';
+      v.onloadedmetadata = () => decide(v.videoWidth, v.videoHeight);
+      v.src = asset.src;
+    } else {
+      const im = new Image();
+      im.onload = () => decide(im.naturalWidth, im.naturalHeight);
+      im.src = asset.src;
+    }
+    return () => { cancelled = true; };
+  }, [project, i]);
 
   // When startIdx changes (e.g. clicking a section card), scroll the info panel to that section header.
   // Skip when opening from the hero (startIdx === 0) — first section is already at the top.
@@ -3915,7 +3967,7 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
           }
         </div>
       }
-      <div className={`modal-inner`}>
+      <div className={`modal-inner mo-${orient} ${a && a.type === 'pdf' ? 'is-pdf' : ''}`}>
         <button className="modal-x" onClick={onClose} aria-label="Cerrar">×</button>
         <div className="modal-img-col"
              style={altVersion && project.alt && a && a.type==='img' ? { filter: project.alt.filter } : null}>
@@ -3966,7 +4018,7 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
               ⚠ {tm.pendingNote}
             </p>
           }
-          {total > 0 &&
+          {total > 1 &&
           <div className="modal-thumbs">
               {/* Sólo la SECCIÓN ACTUAL (no las 6 apiladas) → panel limpio y sin el
                   auto-scroll a anclas que se buggeaba. Se cambia de sección con las
@@ -4206,7 +4258,7 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
 </script>
 <!-- App PRECOMPILADA (JSX → React.createElement). Evita el compilado de Babel
      en runtime (~446ms de bloqueo del main thread en cada carga). -->
-<script src="app.compiled.js?v=12"></script>
+<script src="app.compiled.js?v=15"></script>
 
 <!-- ───────────────────────────────────────────────────────────────
      MOTION ENHANCE — orquestador (vanilla, fuera de React).
