@@ -1125,6 +1125,16 @@
   .thumb.on{opacity:1;outline:2px solid var(--ink);outline-offset:-2px}
   .thumb img{width:100%;height:100%;object-fit:cover}
   .thumb .pill{position:absolute;top:4px;left:4px;background:var(--ink);color:var(--paper);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.15em;padding:2px 5px;line-height:1.2}
+  /* Nav de piezas (Anterior/Siguiente) en el panel blanco de la derecha (imagen/video)
+     → no tapa la media. */
+  .modal-info-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+  .modal-info-nav button{appearance:none;background:transparent;border:1px solid var(--ink);color:var(--ink);padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+  .modal-info-nav button:hover{background:var(--ink);color:var(--paper)}
+  .modal-info-nav .counter{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--mute);white-space:nowrap}
+  .modal-dark .modal-info-nav{border-bottom-color:rgba(244,242,236,.16)}
+  .modal-dark .modal-info-nav button{border-color:#f4f2ec;color:#f4f2ec}
+  .modal-dark .modal-info-nav button:hover{background:#f4f2ec;color:#0a0907}
+  .modal-dark .modal-info-nav .counter{color:rgba(244,242,236,.6)}
   .modal-actions{display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)}
   .modal-actions button,.modal-actions a{appearance:none;background:transparent;color:var(--ink);border:1px solid var(--ink);padding:12px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;cursor:pointer;text-decoration:none;transition:background .2s,color .2s}
   .modal-actions button:hover,.modal-actions a:hover{background:var(--ink);color:var(--paper)}
@@ -3990,8 +4000,10 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
                   hasAlt={!!project.alt && a.type === 'pdf'}
                   onImgClick={() => setImgFull(true)}
                /> : <img src={project.cover} alt={project.name} onClick={() => setImgFull(true)} style={{cursor:'zoom-in'}} />}
-          {total > 1 &&
-          <div className={`modal-mini ${a && a.type === 'pdf' ? 'modal-mini-pdf' : ''}`}>
+          {/* En PDF, la nav de piezas queda sobre el lector (arriba). En imagen/video
+              se movió al panel blanco de la derecha (ver .modal-info-nav). */}
+          {total > 1 && a && a.type === 'pdf' &&
+          <div className="modal-mini modal-mini-pdf">
               <button onClick={() => setI((x) => (x - 1 + total) % total)} aria-label="Anterior"><span className="mm-arrow">←</span><span className="mm-label">{tm.prev.replace(/[←→]/g,'').trim()}</span></button>
               <span className="counter">{a && a.section ? `${a.section} · ` : ''}{i + 1} / {total}</span>
               <button onClick={() => setI((x) => (x + 1) % total)} aria-label="Siguiente"><span className="mm-label">{tm.next.replace(/[←→]/g,'').trim()}</span><span className="mm-arrow">→</span></button>
@@ -3999,6 +4011,13 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
           }
         </div>
         <div className="modal-info" ref={infoRef}>
+          {total > 1 && a && a.type !== 'pdf' &&
+            <div className="modal-info-nav">
+              <button onClick={() => setI((x) => (x - 1 + total) % total)} aria-label="Anterior"><span className="mm-arrow">←</span> {tm.prev.replace(/[←→]/g,'').trim()}</button>
+              <span className="counter">{a && a.section ? `${a.section} · ` : ''}{i + 1} / {total}</span>
+              <button onClick={() => setI((x) => (x + 1) % total)} aria-label="Siguiente">{tm.next.replace(/[←→]/g,'').trim()} <span className="mm-arrow">→</span></button>
+            </div>
+          }
           {hasSections &&
             <nav className="modal-sec-nav" aria-label="Secciones del proyecto">
               {groups.map((g) =>
@@ -4053,7 +4072,6 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
           }
           <div className="modal-actions">
             <button className="primary" onClick={onClose}>{tm.back}</button>
-            {a && a.type === 'video' && <a href={a.src} target="_blank" rel="noreferrer">{tm.openVideo} →</a>}
           </div>
         </div>
       </div>
@@ -4258,7 +4276,7 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
 </script>
 <!-- App PRECOMPILADA (JSX → React.createElement). Evita el compilado de Babel
      en runtime (~446ms de bloqueo del main thread en cada carga). -->
-<script src="app.compiled.js?v=15"></script>
+<script src="app.compiled.js?v=16"></script>
 
 <!-- ───────────────────────────────────────────────────────────────
      MOTION ENHANCE — orquestador (vanilla, fuera de React).

@@ -2879,8 +2879,8 @@ function ProjectModal({
     style: {
       cursor: 'zoom-in'
     }
-  }), total > 1 && /*#__PURE__*/React.createElement("div", {
-    className: `modal-mini ${a && a.type === 'pdf' ? 'modal-mini-pdf' : ''}`
+  }), total > 1 && a && a.type === 'pdf' && /*#__PURE__*/React.createElement("div", {
+    className: "modal-mini modal-mini-pdf"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setI(x => (x - 1 + total) % total),
     "aria-label": "Anterior"
@@ -2900,7 +2900,21 @@ function ProjectModal({
   }, "\u2192")))), /*#__PURE__*/React.createElement("div", {
     className: "modal-info",
     ref: infoRef
-  }, hasSections && /*#__PURE__*/React.createElement("nav", {
+  }, total > 1 && a && a.type !== 'pdf' && /*#__PURE__*/React.createElement("div", {
+    className: "modal-info-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setI(x => (x - 1 + total) % total),
+    "aria-label": "Anterior"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mm-arrow"
+  }, "\u2190"), " ", tm.prev.replace(/[←→]/g, '').trim()), /*#__PURE__*/React.createElement("span", {
+    className: "counter"
+  }, a && a.section ? `${a.section} · ` : '', i + 1, " / ", total), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setI(x => (x + 1) % total),
+    "aria-label": "Siguiente"
+  }, tm.next.replace(/[←→]/g, '').trim(), " ", /*#__PURE__*/React.createElement("span", {
+    className: "mm-arrow"
+  }, "\u2192"))), hasSections && /*#__PURE__*/React.createElement("nav", {
     className: "modal-sec-nav",
     "aria-label": "Secciones del proyecto"
   }, groups.map(g => /*#__PURE__*/React.createElement("button", {
@@ -2971,11 +2985,7 @@ function ProjectModal({
   }, /*#__PURE__*/React.createElement("button", {
     className: "primary",
     onClick: onClose
-  }, tm.back), a && a.type === 'video' && /*#__PURE__*/React.createElement("a", {
-    href: a.src,
-    target: "_blank",
-    rel: "noreferrer"
-  }, tm.openVideo, " \u2192")))));
+  }, tm.back)))));
 }
 function ComicReader({
   open,
