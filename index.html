@@ -896,16 +896,16 @@
   .pj-3d-desc{font-size:14.5px;line-height:1.6;color:var(--mute);max-width:760px;text-wrap:pretty}
   .pj-3d-meta{display:flex;gap:14px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);padding-top:6px}
   .pj-3d-meta b{color:var(--ink);font-weight:600}
-  /* Cuartos 3D Spider-Man: 2 carruseles (filas) que auto-scrollean en sentidos
-     opuestos. Las imágenes van duplicadas → loop sin cortes (translateX -50%). */
-  .pj-3d-carousels{display:flex;flex-direction:column;gap:12px;overflow:hidden;background:#0c0c0c;padding:12px 0}
-  .pj-3d-track{display:flex;gap:12px;width:max-content;will-change:transform;animation:room-marquee 42s linear infinite}
-  .pj-3d-track.rev{animation-direction:reverse;animation-duration:52s}
-  .pj-3d-room:hover .pj-3d-track{animation-play-state:paused}
-  .pj-3d-frame{flex:0 0 auto;height:240px;overflow:hidden;background:#161412}
-  .pj-3d-frame img{height:100%;width:auto;object-fit:cover;display:block}
-  @keyframes room-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  @media (prefers-reduced-motion:reduce){ .pj-3d-carousels{overflow-x:auto} .pj-3d-track{animation:none;width:auto} }
+  /* Cuartos 3D Spider-Man: slideshow con auto-avance + fade (como el cover de
+     Animación). 1 carrusel por proyecto (low-poly / high-poly). */
+  .pj-3d-slideshow{position:relative;aspect-ratio:16/9;min-height:420px;overflow:hidden;background:#0c0c0c}
+  .pj-3d-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s ease}
+  .pj-3d-slide.on{opacity:1}
+  .pj-3d:hover .pj-3d-slide.on{transform:scale(1.02);transition:opacity .9s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
+  .pj-3d-slide-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:2}
+  .pj-3d-slide-dots span{width:7px;height:7px;border-radius:50%;background:rgba(244,242,236,.4);transition:background .3s,width .3s}
+  .pj-3d-slide-dots span.on{background:#f4f2ec;width:20px;border-radius:4px}
+  @media (prefers-reduced-motion:reduce){ .pj-3d-slide{transition:none} }
 
   /* COMIC pages — wider on illu */
   #s-comic .comic-pages{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-bottom:24px}
@@ -1129,15 +1129,16 @@
   .thumbs-section-h .h-n{color:var(--mute);font-weight:400;letter-spacing:.18em}
   /* Tira horizontal de 1 fila (filmstrip): la cantidad de piezas ya no agranda el
      alto del panel → sin scroll vertical. Si hay muchas, se corren en horizontal. */
-  .thumbs-strip{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding-bottom:6px;scrollbar-width:thin}
-  .thumb{flex:0 0 84px;width:84px;aspect-ratio:1;background:#fff;cursor:pointer;overflow:hidden;position:relative;transition:opacity .15s;opacity:.55}
+  /* Grilla que wrappea → se ven TODAS las miniaturas (clickeables), sin scroll horizontal. */
+  .thumbs-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px}
+  .thumb{width:100%;aspect-ratio:1;background:#fff;cursor:pointer;overflow:hidden;position:relative;transition:opacity .15s;opacity:.55}
   .thumb:hover{opacity:1}
   .thumb.on{opacity:1;outline:2px solid var(--ink);outline-offset:-2px}
   .thumb img{width:100%;height:100%;object-fit:cover}
   .thumb .pill{position:absolute;top:4px;left:4px;background:var(--ink);color:var(--paper);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.15em;padding:2px 5px;line-height:1.2}
   /* Nav de piezas (Anterior/Siguiente) en el panel blanco de la derecha (imagen/video)
      → no tapa la media. */
-  .modal-info-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)}
+  .modal-info-nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)}
   /* va justo arriba de "Volver": sin doble línea, sólo un respiro. */
   .modal-info-nav + .modal-actions{margin-top:12px;padding-top:0;border-top:none}
   .modal-info-nav button{appearance:none;background:transparent;border:1px solid var(--ink);color:var(--ink);padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
@@ -1422,8 +1423,7 @@
     .pj-posters-foot{grid-template-columns:1fr;gap:24px}
     .pj-3d-hero{min-height:240px;aspect-ratio:4/3}
     .pj-3d-hero-label{padding:22px}
-    .pj-3d-frame{height:150px}
-    .pj-3d-carousels{gap:8px;padding:8px 0}
+    .pj-3d-slideshow{min-height:200px;aspect-ratio:4/3}
     .pj-tesis-section{padding:24px 0}
     .pj-tesis-slug{grid-template-columns:1fr;gap:14px;padding:20px 0}
     .pj-tesis-slug-c{text-align:left}
@@ -2991,6 +2991,29 @@ function PostersCard({ p, num, totalStr, lang, t, onOpenProject }) {
     </article>);
 }
 
+// Slideshow de un cuarto 3D: las imágenes van cambiando solas con fade (auto-avance),
+// como el cover de Animación. Un carrusel por proyecto (low-poly / high-poly).
+function RoomSlideshow({ imgs, name }) {
+  const list = imgs || [];
+  const [idx, setIdx] = React.useState(0);
+  React.useEffect(() => {
+    if (list.length < 2) return;
+    const id = setInterval(() => setIdx((i) => (i + 1) % list.length), 2800);
+    return () => clearInterval(id);
+  }, [list.length]);
+  if (!list.length) return <div className="pj-3d-hero"><div className="dg-featured-ph"></div></div>;
+  return (
+    <div className="pj-3d-slideshow" aria-label={name}>
+      {list.map((a, i) => (
+        <img key={i} src={a.src} alt="" loading="lazy" className={`pj-3d-slide ${i === idx ? 'on' : ''}`} />
+      ))}
+      <div className="pj-3d-slide-dots" aria-hidden="true">
+        {list.map((_, i) => <span key={i} className={i === idx ? 'on' : ''} />)}
+      </div>
+    </div>
+  );
+}
+
 function DesignSection({ lang, onOpenProject, onSwitchView }) {  const t = I18N[lang].design;
   const ti = I18N[lang].illu;
   const [filter, setFilter] = useState('all');
@@ -3353,13 +3376,10 @@ function DesignSection({ lang, onOpenProject, onSwitchView }) {  const t = I18N[
 
   };
 
-  // Cuartos 3D de Spider-Man: las fotos van pasando en 2 carruseles (filas que
-  // auto-scrollean en sentidos opuestos). Motion design; se pausan al hover.
+  // Cuartos 3D de Spider-Man: las fotos van cambiando solas (slideshow con fade),
+  // como el cover de Animación. 1 carrusel por proyecto (low-poly / high-poly).
   const render3DRoomCard = (p, num, totalStr) => {
     const imgs = p.assets.filter((a) => a.type === 'img');
-    const mid = Math.ceil(imgs.length / 2);
-    const rowA = imgs.slice(0, mid);
-    const rowB = imgs.slice(mid).concat(imgs.slice(0, Math.max(0, mid - (imgs.length - mid))));
     const poly = /hp|high/i.test(p.id + p.cat) ? 'High-poly' : 'Low-poly';
     return (
       <article key={p.id} className="pj-3d pj-3d-room" onClick={() => onOpenProject(p)}>
@@ -3368,14 +3388,7 @@ function DesignSection({ lang, onOpenProject, onSwitchView }) {  const t = I18N[
           <h3 className="pj-3d-section-h">{p.name}</h3>
           <span className="pj-posters-tag">{poly} · 3D</span>
         </div>
-        <div className="pj-3d-carousels" aria-hidden="true">
-          <div className="pj-3d-track">
-            {[...rowA, ...rowA].map((a, i) => <div className="pj-3d-frame" key={i}><img src={a.src} alt="" loading="lazy" /></div>)}
-          </div>
-          <div className="pj-3d-track rev">
-            {[...rowB, ...rowB].map((a, i) => <div className="pj-3d-frame" key={i}><img src={a.src} alt="" loading="lazy" /></div>)}
-          </div>
-        </div>
+        <RoomSlideshow imgs={imgs} name={p.name} />
         <div className="pj-3d-foot">
           <p className="pj-3d-desc">{p.desc[lang]}</p>
           <div className="pj-3d-meta">
@@ -4115,7 +4128,7 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
           {total > 1 && a && a.type !== 'pdf' &&
             <div className="modal-info-nav">
               <button onClick={() => setI((x) => (x - 1 + total) % total)} aria-label="Anterior"><span className="mm-arrow">←</span> {tm.prev.replace(/[←→]/g,'').trim()}</button>
-              <span className="counter">{a && a.section ? `${a.section} · ` : ''}{i + 1} / {total}</span>
+              <span className="counter">{i + 1} / {total}</span>
               <button onClick={() => setI((x) => (x + 1) % total)} aria-label="Siguiente">{tm.next.replace(/[←→]/g,'').trim()} <span className="mm-arrow">→</span></button>
             </div>
           }
@@ -4325,7 +4338,7 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
 </script>
 <!-- App PRECOMPILADA (JSX → React.createElement). Evita el compilado de Babel
      en runtime (~446ms de bloqueo del main thread en cada carga). -->
-<script src="app.compiled.js?v=17"></script>
+<script src="app.compiled.js?v=19"></script>
 
 <!-- ───────────────────────────────────────────────────────────────
      MOTION ENHANCE — orquestador (vanilla, fuera de React).

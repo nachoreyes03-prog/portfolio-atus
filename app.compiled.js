@@ -1339,6 +1339,42 @@ function PostersCard({
     className: "pj-poster-mini-l"
   }, String(i + 1).padStart(2, '0'), " \xB7 ", a.label))))));
 }
+
+// Slideshow de un cuarto 3D: las imágenes van cambiando solas con fade (auto-avance),
+// como el cover de Animación. Un carrusel por proyecto (low-poly / high-poly).
+function RoomSlideshow({
+  imgs,
+  name
+}) {
+  const list = imgs || [];
+  const [idx, setIdx] = React.useState(0);
+  React.useEffect(() => {
+    if (list.length < 2) return;
+    const id = setInterval(() => setIdx(i => (i + 1) % list.length), 2800);
+    return () => clearInterval(id);
+  }, [list.length]);
+  if (!list.length) return /*#__PURE__*/React.createElement("div", {
+    className: "pj-3d-hero"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dg-featured-ph"
+  }));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "pj-3d-slideshow",
+    "aria-label": name
+  }, list.map((a, i) => /*#__PURE__*/React.createElement("img", {
+    key: i,
+    src: a.src,
+    alt: "",
+    loading: "lazy",
+    className: `pj-3d-slide ${i === idx ? 'on' : ''}`
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "pj-3d-slide-dots",
+    "aria-hidden": "true"
+  }, list.map((_, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    className: i === idx ? 'on' : ''
+  }))));
+}
 function DesignSection({
   lang,
   onOpenProject,
@@ -1856,13 +1892,10 @@ function DesignSection({
     }, t.viewProject, " \u2192"))));
   };
 
-  // Cuartos 3D de Spider-Man: las fotos van pasando en 2 carruseles (filas que
-  // auto-scrollean en sentidos opuestos). Motion design; se pausan al hover.
+  // Cuartos 3D de Spider-Man: las fotos van cambiando solas (slideshow con fade),
+  // como el cover de Animación. 1 carrusel por proyecto (low-poly / high-poly).
   const render3DRoomCard = (p, num, totalStr) => {
     const imgs = p.assets.filter(a => a.type === 'img');
-    const mid = Math.ceil(imgs.length / 2);
-    const rowA = imgs.slice(0, mid);
-    const rowB = imgs.slice(mid).concat(imgs.slice(0, Math.max(0, mid - (imgs.length - mid))));
     const poly = /hp|high/i.test(p.id + p.cat) ? 'High-poly' : 'Low-poly';
     return /*#__PURE__*/React.createElement("article", {
       key: p.id,
@@ -1876,28 +1909,10 @@ function DesignSection({
       className: "pj-3d-section-h"
     }, p.name), /*#__PURE__*/React.createElement("span", {
       className: "pj-posters-tag"
-    }, poly, " \xB7 3D")), /*#__PURE__*/React.createElement("div", {
-      className: "pj-3d-carousels",
-      "aria-hidden": "true"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "pj-3d-track"
-    }, [...rowA, ...rowA].map((a, i) => /*#__PURE__*/React.createElement("div", {
-      className: "pj-3d-frame",
-      key: i
-    }, /*#__PURE__*/React.createElement("img", {
-      src: a.src,
-      alt: "",
-      loading: "lazy"
-    })))), /*#__PURE__*/React.createElement("div", {
-      className: "pj-3d-track rev"
-    }, [...rowB, ...rowB].map((a, i) => /*#__PURE__*/React.createElement("div", {
-      className: "pj-3d-frame",
-      key: i
-    }, /*#__PURE__*/React.createElement("img", {
-      src: a.src,
-      alt: "",
-      loading: "lazy"
-    }))))), /*#__PURE__*/React.createElement("div", {
+    }, poly, " \xB7 3D")), /*#__PURE__*/React.createElement(RoomSlideshow, {
+      imgs: imgs,
+      name: p.name
+    }), /*#__PURE__*/React.createElement("div", {
       className: "pj-3d-foot"
     }, /*#__PURE__*/React.createElement("p", {
       className: "pj-3d-desc"
@@ -3033,7 +3048,7 @@ function ProjectModal({
     className: "mm-arrow"
   }, "\u2190"), " ", tm.prev.replace(/[←→]/g, '').trim()), /*#__PURE__*/React.createElement("span", {
     className: "counter"
-  }, a && a.section ? `${a.section} · ` : '', i + 1, " / ", total), /*#__PURE__*/React.createElement("button", {
+  }, i + 1, " / ", total), /*#__PURE__*/React.createElement("button", {
     onClick: () => setI(x => (x + 1) % total),
     "aria-label": "Siguiente"
   }, tm.next.replace(/[←→]/g, '').trim(), " ", /*#__PURE__*/React.createElement("span", {
