@@ -896,6 +896,16 @@
   .pj-3d-desc{font-size:14.5px;line-height:1.6;color:var(--mute);max-width:760px;text-wrap:pretty}
   .pj-3d-meta{display:flex;gap:14px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);padding-top:6px}
   .pj-3d-meta b{color:var(--ink);font-weight:600}
+  /* Cuartos 3D Spider-Man: 2 carruseles (filas) que auto-scrollean en sentidos
+     opuestos. Las imágenes van duplicadas → loop sin cortes (translateX -50%). */
+  .pj-3d-carousels{display:flex;flex-direction:column;gap:12px;overflow:hidden;background:#0c0c0c;padding:12px 0}
+  .pj-3d-track{display:flex;gap:12px;width:max-content;will-change:transform;animation:room-marquee 42s linear infinite}
+  .pj-3d-track.rev{animation-direction:reverse;animation-duration:52s}
+  .pj-3d-room:hover .pj-3d-track{animation-play-state:paused}
+  .pj-3d-frame{flex:0 0 auto;height:240px;overflow:hidden;background:#161412}
+  .pj-3d-frame img{height:100%;width:auto;object-fit:cover;display:block}
+  @keyframes room-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion:reduce){ .pj-3d-carousels{overflow-x:auto} .pj-3d-track{animation:none;width:auto} }
 
   /* COMIC pages — wider on illu */
   #s-comic .comic-pages{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-bottom:24px}
@@ -1127,11 +1137,13 @@
   .thumb .pill{position:absolute;top:4px;left:4px;background:var(--ink);color:var(--paper);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.15em;padding:2px 5px;line-height:1.2}
   /* Nav de piezas (Anterior/Siguiente) en el panel blanco de la derecha (imagen/video)
      → no tapa la media. */
-  .modal-info-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+  .modal-info-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)}
+  /* va justo arriba de "Volver": sin doble línea, sólo un respiro. */
+  .modal-info-nav + .modal-actions{margin-top:12px;padding-top:0;border-top:none}
   .modal-info-nav button{appearance:none;background:transparent;border:1px solid var(--ink);color:var(--ink);padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
   .modal-info-nav button:hover{background:var(--ink);color:var(--paper)}
   .modal-info-nav .counter{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--mute);white-space:nowrap}
-  .modal-dark .modal-info-nav{border-bottom-color:rgba(244,242,236,.16)}
+  .modal-dark .modal-info-nav{border-top-color:rgba(244,242,236,.16)}
   .modal-dark .modal-info-nav button{border-color:#f4f2ec;color:#f4f2ec}
   .modal-dark .modal-info-nav button:hover{background:#f4f2ec;color:#0a0907}
   .modal-dark .modal-info-nav .counter{color:rgba(244,242,236,.6)}
@@ -1410,6 +1422,8 @@
     .pj-posters-foot{grid-template-columns:1fr;gap:24px}
     .pj-3d-hero{min-height:240px;aspect-ratio:4/3}
     .pj-3d-hero-label{padding:22px}
+    .pj-3d-frame{height:150px}
+    .pj-3d-carousels{gap:8px;padding:8px 0}
     .pj-tesis-section{padding:24px 0}
     .pj-tesis-slug{grid-template-columns:1fr;gap:14px;padding:20px 0}
     .pj-tesis-slug-c{text-align:left}
@@ -3339,6 +3353,40 @@ function DesignSection({ lang, onOpenProject, onSwitchView }) {  const t = I18N[
 
   };
 
+  // Cuartos 3D de Spider-Man: las fotos van pasando en 2 carruseles (filas que
+  // auto-scrollean en sentidos opuestos). Motion design; se pausan al hover.
+  const render3DRoomCard = (p, num, totalStr) => {
+    const imgs = p.assets.filter((a) => a.type === 'img');
+    const mid = Math.ceil(imgs.length / 2);
+    const rowA = imgs.slice(0, mid);
+    const rowB = imgs.slice(mid).concat(imgs.slice(0, Math.max(0, mid - (imgs.length - mid))));
+    const poly = /hp|high/i.test(p.id + p.cat) ? 'High-poly' : 'Low-poly';
+    return (
+      <article key={p.id} className="pj-3d pj-3d-room" onClick={() => onOpenProject(p)}>
+        <div className="pj-3d-head">
+          <span className="pj-num">{num} / {totalStr} — {p.year}</span>
+          <h3 className="pj-3d-section-h">{p.name}</h3>
+          <span className="pj-posters-tag">{poly} · 3D</span>
+        </div>
+        <div className="pj-3d-carousels" aria-hidden="true">
+          <div className="pj-3d-track">
+            {[...rowA, ...rowA].map((a, i) => <div className="pj-3d-frame" key={i}><img src={a.src} alt="" loading="lazy" /></div>)}
+          </div>
+          <div className="pj-3d-track rev">
+            {[...rowB, ...rowB].map((a, i) => <div className="pj-3d-frame" key={i}><img src={a.src} alt="" loading="lazy" /></div>)}
+          </div>
+        </div>
+        <div className="pj-3d-foot">
+          <p className="pj-3d-desc">{p.desc[lang]}</p>
+          <div className="pj-3d-meta">
+            <span><b>Blender</b></span><span>·</span>
+            <span><b>{imgs.length}</b> renders</span><span>·</span><span>{p.year}</span>
+            <span className="pj-link" style={{ marginLeft: 'auto' }}>{t.viewProject} →</span>
+          </div>
+        </div>
+      </article>);
+  };
+
   return (
     <section id="design" className="sec">
       <div className="wrap">
@@ -3411,6 +3459,7 @@ function DesignSection({ lang, onOpenProject, onSwitchView }) {  const t = I18N[
             if (p.featureKoizone) return renderKoizoneCard(p, num, totalStr);
             if (p.tag === 'posters') return <PostersCard key={p.id} p={p} num={num} totalStr={totalStr} lang={lang} t={t} onOpenProject={onOpenProject} />;
             if (p.feature3d) return (<React.Fragment key={p.id}>{banner}{render3DCard(p, num, totalStr)}</React.Fragment>);
+            if (p.id === '3d-spider-hp' || p.id === '3d-spider-lp') return (<React.Fragment key={p.id}>{banner}{render3DRoomCard(p, num, totalStr)}</React.Fragment>);
 
             return (
               <React.Fragment key={p.id}>
@@ -4011,13 +4060,6 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
           }
         </div>
         <div className="modal-info" ref={infoRef}>
-          {total > 1 && a && a.type !== 'pdf' &&
-            <div className="modal-info-nav">
-              <button onClick={() => setI((x) => (x - 1 + total) % total)} aria-label="Anterior"><span className="mm-arrow">←</span> {tm.prev.replace(/[←→]/g,'').trim()}</button>
-              <span className="counter">{a && a.section ? `${a.section} · ` : ''}{i + 1} / {total}</span>
-              <button onClick={() => setI((x) => (x + 1) % total)} aria-label="Siguiente">{tm.next.replace(/[←→]/g,'').trim()} <span className="mm-arrow">→</span></button>
-            </div>
-          }
           {hasSections &&
             <nav className="modal-sec-nav" aria-label="Secciones del proyecto">
               {groups.map((g) =>
@@ -4068,6 +4110,13 @@ function ProjectModal({ project, startIdx, onClose, lang }) {
                   </div>
                 );
               })}
+            </div>
+          }
+          {total > 1 && a && a.type !== 'pdf' &&
+            <div className="modal-info-nav">
+              <button onClick={() => setI((x) => (x - 1 + total) % total)} aria-label="Anterior"><span className="mm-arrow">←</span> {tm.prev.replace(/[←→]/g,'').trim()}</button>
+              <span className="counter">{a && a.section ? `${a.section} · ` : ''}{i + 1} / {total}</span>
+              <button onClick={() => setI((x) => (x + 1) % total)} aria-label="Siguiente">{tm.next.replace(/[←→]/g,'').trim()} <span className="mm-arrow">→</span></button>
             </div>
           }
           <div className="modal-actions">
@@ -4276,7 +4325,7 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
 </script>
 <!-- App PRECOMPILADA (JSX → React.createElement). Evita el compilado de Babel
      en runtime (~446ms de bloqueo del main thread en cada carga). -->
-<script src="app.compiled.js?v=16"></script>
+<script src="app.compiled.js?v=17"></script>
 
 <!-- ───────────────────────────────────────────────────────────────
      MOTION ENHANCE — orquestador (vanilla, fuera de React).

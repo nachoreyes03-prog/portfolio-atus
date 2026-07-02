@@ -1855,6 +1855,61 @@ function DesignSection({
       }
     }, t.viewProject, " \u2192"))));
   };
+
+  // Cuartos 3D de Spider-Man: las fotos van pasando en 2 carruseles (filas que
+  // auto-scrollean en sentidos opuestos). Motion design; se pausan al hover.
+  const render3DRoomCard = (p, num, totalStr) => {
+    const imgs = p.assets.filter(a => a.type === 'img');
+    const mid = Math.ceil(imgs.length / 2);
+    const rowA = imgs.slice(0, mid);
+    const rowB = imgs.slice(mid).concat(imgs.slice(0, Math.max(0, mid - (imgs.length - mid))));
+    const poly = /hp|high/i.test(p.id + p.cat) ? 'High-poly' : 'Low-poly';
+    return /*#__PURE__*/React.createElement("article", {
+      key: p.id,
+      className: "pj-3d pj-3d-room",
+      onClick: () => onOpenProject(p)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "pj-3d-head"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "pj-num"
+    }, num, " / ", totalStr, " \u2014 ", p.year), /*#__PURE__*/React.createElement("h3", {
+      className: "pj-3d-section-h"
+    }, p.name), /*#__PURE__*/React.createElement("span", {
+      className: "pj-posters-tag"
+    }, poly, " \xB7 3D")), /*#__PURE__*/React.createElement("div", {
+      className: "pj-3d-carousels",
+      "aria-hidden": "true"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "pj-3d-track"
+    }, [...rowA, ...rowA].map((a, i) => /*#__PURE__*/React.createElement("div", {
+      className: "pj-3d-frame",
+      key: i
+    }, /*#__PURE__*/React.createElement("img", {
+      src: a.src,
+      alt: "",
+      loading: "lazy"
+    })))), /*#__PURE__*/React.createElement("div", {
+      className: "pj-3d-track rev"
+    }, [...rowB, ...rowB].map((a, i) => /*#__PURE__*/React.createElement("div", {
+      className: "pj-3d-frame",
+      key: i
+    }, /*#__PURE__*/React.createElement("img", {
+      src: a.src,
+      alt: "",
+      loading: "lazy"
+    }))))), /*#__PURE__*/React.createElement("div", {
+      className: "pj-3d-foot"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "pj-3d-desc"
+    }, p.desc[lang]), /*#__PURE__*/React.createElement("div", {
+      className: "pj-3d-meta"
+    }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, "Blender")), /*#__PURE__*/React.createElement("span", null, "\xB7"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, imgs.length), " renders"), /*#__PURE__*/React.createElement("span", null, "\xB7"), /*#__PURE__*/React.createElement("span", null, p.year), /*#__PURE__*/React.createElement("span", {
+      className: "pj-link",
+      style: {
+        marginLeft: 'auto'
+      }
+    }, t.viewProject, " \u2192"))));
+  };
   return /*#__PURE__*/React.createElement("section", {
     id: "design",
     className: "sec"
@@ -1942,6 +1997,9 @@ function DesignSection({
     if (p.feature3d) return /*#__PURE__*/React.createElement(React.Fragment, {
       key: p.id
     }, banner, render3DCard(p, num, totalStr));
+    if (p.id === '3d-spider-hp' || p.id === '3d-spider-lp') return /*#__PURE__*/React.createElement(React.Fragment, {
+      key: p.id
+    }, banner, render3DRoomCard(p, num, totalStr));
     return /*#__PURE__*/React.createElement(React.Fragment, {
       key: p.id
     }, banner, /*#__PURE__*/React.createElement("article", {
@@ -2900,21 +2958,7 @@ function ProjectModal({
   }, "\u2192")))), /*#__PURE__*/React.createElement("div", {
     className: "modal-info",
     ref: infoRef
-  }, total > 1 && a && a.type !== 'pdf' && /*#__PURE__*/React.createElement("div", {
-    className: "modal-info-nav"
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setI(x => (x - 1 + total) % total),
-    "aria-label": "Anterior"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mm-arrow"
-  }, "\u2190"), " ", tm.prev.replace(/[←→]/g, '').trim()), /*#__PURE__*/React.createElement("span", {
-    className: "counter"
-  }, a && a.section ? `${a.section} · ` : '', i + 1, " / ", total), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setI(x => (x + 1) % total),
-    "aria-label": "Siguiente"
-  }, tm.next.replace(/[←→]/g, '').trim(), " ", /*#__PURE__*/React.createElement("span", {
-    className: "mm-arrow"
-  }, "\u2192"))), hasSections && /*#__PURE__*/React.createElement("nav", {
+  }, hasSections && /*#__PURE__*/React.createElement("nav", {
     className: "modal-sec-nav",
     "aria-label": "Secciones del proyecto"
   }, groups.map(g => /*#__PURE__*/React.createElement("button", {
@@ -2980,7 +3024,21 @@ function ProjectModal({
       fallback: as.cover || project.cover,
       alt: as.label
     })))));
-  })), /*#__PURE__*/React.createElement("div", {
+  })), total > 1 && a && a.type !== 'pdf' && /*#__PURE__*/React.createElement("div", {
+    className: "modal-info-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setI(x => (x - 1 + total) % total),
+    "aria-label": "Anterior"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mm-arrow"
+  }, "\u2190"), " ", tm.prev.replace(/[←→]/g, '').trim()), /*#__PURE__*/React.createElement("span", {
+    className: "counter"
+  }, a && a.section ? `${a.section} · ` : '', i + 1, " / ", total), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setI(x => (x + 1) % total),
+    "aria-label": "Siguiente"
+  }, tm.next.replace(/[←→]/g, '').trim(), " ", /*#__PURE__*/React.createElement("span", {
+    className: "mm-arrow"
+  }, "\u2192"))), /*#__PURE__*/React.createElement("div", {
     className: "modal-actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "primary",
