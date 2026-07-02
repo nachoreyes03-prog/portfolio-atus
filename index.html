@@ -1448,7 +1448,13 @@
     .pj-rail-arr{width:38px;height:72px;font-size:24px}
     .pj-posters-stage{grid-template-columns:1fr;gap:18px}
     .pj-posters-hero-img{min-height:0}
-    .pj-posters-side{grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(140px,1fr)}
+    /* MOBILE/TABLET: cada póster llena el ancho de su columna (alto natural), en vez
+       de quedar chico y alineado a la izquierda con hueco a la derecha. */
+    .pj-posters-side{grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;align-items:start;gap:18px 12px}
+    /* especificidad extra (.pj-posters-side ...) para ganarle al fix WebKit de más abajo
+       que deja la img en position:absolute (colapsaba el contenedor a 0px en mobile). */
+    .pj-posters-side .pj-poster-mini-img{position:static;flex:none;display:block;min-height:0}
+    .pj-posters-side .pj-poster-mini-img > img{position:static;width:100%;height:auto;max-width:100%;object-fit:contain;object-position:center}
     .se-spider-bento{grid-template-columns:repeat(3,1fr)}
     .se-spider-bento > .gcard:first-child{grid-column:span 2;grid-row:span 2}
     .se-flagship-split{grid-template-columns:1fr;gap:32px}
@@ -1518,7 +1524,7 @@
     .pj-poster.pp-2,.pj-poster.pp-3,.pj-poster.pp-5,.pj-poster.pp-pdf{grid-column:span 1;grid-row:span 1}
     .pj-3d-hero{min-height:200px;aspect-ratio:4/3}
     .pj-posters-hero-img{min-height:0}
-    .pj-posters-side{grid-template-columns:repeat(2,1fr);grid-auto-rows:minmax(120px,1fr)}
+    .pj-posters-side{grid-template-columns:repeat(2,1fr);grid-auto-rows:auto;align-items:start;gap:16px 10px}
     .se-spider-bento{grid-template-columns:repeat(2,1fr);gap:8px}
     .se-spider-bento > .gcard:first-child{grid-column:span 2;grid-row:span 1}
     .se-flagship-grid.c3,.se-flagship-grid.c4{grid-template-columns:repeat(2,1fr)}
