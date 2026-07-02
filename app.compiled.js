@@ -1150,9 +1150,7 @@ function TesisFeatured({
     tabIndex: 0,
     onMouseEnter: isTouch ? undefined : () => setPeek(true),
     onMouseLeave: isTouch ? undefined : () => setPeek(false),
-    onClick: () => {
-      if (isTouch && !peek) setPeek(true);else openPanel();
-    },
+    onClick: () => openPanel(),
     onKeyDown: e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();

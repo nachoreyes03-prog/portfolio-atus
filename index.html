@@ -310,6 +310,14 @@
   .dg-featured-cta .arr{font-family:'Poppins',sans-serif;font-size:20px;transition:transform .25s}
   .dg-featured:hover .dg-featured-cta .arr{transform:translateY(5px)}
   @media (max-width:820px){ .dg-featured{grid-template-columns:1fr} .dg-featured-media{min-height:0;aspect-ratio:16/10} }
+  /* MOBILE: el peek (blur + descripción) es un efecto de HOVER de desktop; en la media
+     corta de mobile la descripción se cortaba y no se leía. Lo desactivamos: el card
+     queda siempre legible y al tocar abre el panel (que ya tiene toda la info). */
+  @media (max-width:820px){
+    .tesis-featured .tesis-peek,.tesis-featured .tesis-hover-logo{display:none!important}
+    .tesis-featured.peek .dg-featured-media img{filter:none!important;opacity:1!important;transform:none!important}
+    .tesis-featured.peek .dg-featured-info > :not(.tesis-hover-logo){opacity:1!important}
+  }
 
   /* ── Destacado de Tesis: peek (hover/touch → blur + card de info) + panel in-place ── */
   .tesis-featured{position:relative}
@@ -2885,7 +2893,7 @@ function TesisFeatured({ f, lang, onOpenProject }) {
       role="button" tabIndex={0}
       onMouseEnter={isTouch ? undefined : () => setPeek(true)}
       onMouseLeave={isTouch ? undefined : () => setPeek(false)}
-      onClick={() => { if (isTouch && !peek) setPeek(true); else openPanel(); }}
+      onClick={() => openPanel()}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(); } }}
       aria-label={`Ver ${f.name}`}>
       <div className="dg-featured-media">
@@ -4344,7 +4352,7 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
 </script>
 <!-- App PRECOMPILADA (JSX → React.createElement). Evita el compilado de Babel
      en runtime (~446ms de bloqueo del main thread en cada carga). -->
-<script src="app.compiled.js?v=19"></script>
+<script src="app.compiled.js?v=20"></script>
 
 <!-- ───────────────────────────────────────────────────────────────
      MOTION ENHANCE — orquestador (vanilla, fuera de React).
