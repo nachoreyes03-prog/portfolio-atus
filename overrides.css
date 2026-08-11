@@ -61,7 +61,7 @@
 @media (max-width:760px){
   /* HOME COMPACTO: en mobile estaba todo muy grande; con esto las
      dos cajas entran en el primer pantallazo */
-  .hero-landing .hero-logo{max-height:14vh !important;}
+  .hero-landing .hero-logo{max-height:17vh !important;}
   .hero-landing .hero-main{padding-top:0;padding-bottom:6px;}
   .hero-landing .hero-sub{font-size:14px !important;}
   .hero-card{min-height:19.5vh !important;padding:14px 18px 12px !important;}
