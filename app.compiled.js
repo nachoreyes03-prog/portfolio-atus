@@ -2518,6 +2518,92 @@ function About({
     loading: "lazy"
   })))));
 }
+function Services({
+  lang
+}) {
+  const t = I18N[lang].services;
+  const [open, setOpen] = useState(false);
+  // Panel abierto: Escape cierra y bloqueamos el scroll del fondo (igual que el modal de obras)
+  useEffect(() => {
+    if (!open) return;
+    const onKey = e => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+  return /*#__PURE__*/React.createElement("section", {
+    id: "services",
+    className: "sec"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "svc-banner",
+    onClick: () => setOpen(true),
+    "aria-haspopup": "dialog",
+    "aria-expanded": open
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "k"
+  }, t.num), /*#__PURE__*/React.createElement("span", {
+    className: "svc-banner-title"
+  }, t.title, ".", /*#__PURE__*/React.createElement("span", {
+    className: "arr"
+  }, "→")), /*#__PURE__*/React.createElement("span", {
+    className: "svc-banner-meta"
+  }, /*#__PURE__*/React.createElement("span", null, t.meta), /*#__PURE__*/React.createElement("span", null, t.open)))), /*#__PURE__*/React.createElement("div", {
+    className: open ? "svcov open" : "svcov",
+    onClick: () => setOpen(false),
+    role: "dialog",
+    "aria-modal": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "svcov-inner",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "svcov-head"
+  }, /*#__PURE__*/React.createElement("span", null, t.num, " \xB7 Atus"), /*#__PURE__*/React.createElement("button", {
+    className: "svcov-close",
+    onClick: () => setOpen(false),
+    "aria-label": t.close
+  }, "✕")), /*#__PURE__*/React.createElement("h2", {
+    className: "svcov-title"
+  }, t.title, "."), /*#__PURE__*/React.createElement("p", {
+    className: "svcov-sub"
+  }, t.sub), t.rows.map((r, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "svc-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "n"
+  }, r[0]), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, r[1]), /*#__PURE__*/React.createElement("p", {
+    className: "d"
+  }, r[2])))), /*#__PURE__*/React.createElement("div", {
+    className: "svcov-foot"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "svcov-ctas"
+  }, /*#__PURE__*/React.createElement("a", {
+    className: "cta",
+    href: "https://www.instagram.com/atus_dg/",
+    target: "_blank",
+    rel: "noreferrer noopener",
+    onClick: e => {
+      e.preventDefault();
+      window.open('https://www.instagram.com/atus_dg/', '_blank', 'noopener');
+    }
+  }, t.ctaIg, " →"), /*#__PURE__*/React.createElement("a", {
+    className: "cta ghost",
+    href: "mailto:atus.graphic@gmail.com?subject=Hola%20Nacho%20%E2%80%94%20Atus",
+    onClick: e => {
+      e.preventDefault();
+      window.open('mailto:atus.graphic@gmail.com?subject=Hola%20Nacho%20%E2%80%94%20Atus', '_blank');
+    }
+  }, t.ctaMail, " →")), /*#__PURE__*/React.createElement("span", {
+    className: "note"
+  }, t.note)))));
+}
 function Contact({
   lang
 }) {
@@ -3292,6 +3378,8 @@ function App() {
     onJump: jump,
     onEnter: setView
   }), /*#__PURE__*/React.createElement(About, {
+    lang: lang
+  }), /*#__PURE__*/React.createElement(Services, {
     lang: lang
   }), /*#__PURE__*/React.createElement(Contact, {
     lang: lang

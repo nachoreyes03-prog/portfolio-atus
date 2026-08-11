@@ -1,0 +1,155 @@
+/* ============================================================
+   SIMPLIFICADO — capa de reducción sobre el sitio publicado.
+   No toca el core: solo menos texto, menos ruido, menos clics.
+   Para deshacer cualquier regla: borrarla de acá.
+   ============================================================ */
+
+/* HERO — el logo, el nombre y las dos tarjetas. Nada más.
+   (el propio sitio ya escondía el tagline en mobile con el
+   argumento "mucho texto al entrar satura": lo extendemos a desktop) */
+.hero-tagline{display:none !important;}
+.hero-mini-ctas{display:none !important;}   /* duplican Sobre mí / Contacto del nav */
+
+/* HERO — que las tarjetas se NOTEN como botones:
+   borde marcado + chip "VER →" + levantan al pasar el mouse */
+.hero-card{
+  border:1.5px solid var(--ink) !important;
+  position:relative;
+  transition:background .25s,color .25s,transform .25s,box-shadow .25s !important;
+}
+.hero-card::after{
+  content:'VER →';
+  position:absolute;top:14px;right:14px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:.16em;
+  border:1.5px solid currentColor;
+  padding:6px 10px;
+  transition:background .2s,color .2s;
+}
+.hero-card:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(10,10,12,.14);}
+.hero-card-design:hover::after{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.hero-card-illu:hover::after{background:var(--paper);color:var(--ink);border-color:var(--paper);}
+
+/* IDIOMAS — una sola lengua a la vista (ES por defecto): menos botones */
+.lang-btn{display:none !important;}
+
+/* VIUDAS — párrafos sin palabras sueltas al final */
+#app p,#app h1,#app h2,#app h3{text-wrap:pretty;}
+
+/* DESCRIPCIONES DE PROYECTOS — máx. 3 líneas.
+   El texto completo sigue en el código; solo se recorta la lectura.
+   (la de la tesis no se recorta: overrides.js la reemplaza por una corta) */
+[class*="pj-"][class*="-desc"],
+[class*="se-"][class*="-desc"]{
+  display:-webkit-box !important;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+/* ============================================================
+   DISEÑO GRÁFICO — menos textito al entrar
+   (todo scopeado con :has(.tesis-featured) = solo esa vista)
+   ============================================================ */
+
+/* El menú de categorías (Todos · Editorial · Branding…) ARRIBA de la
+   tesis: es navegación de la página, no parte de la tesis */
+.sec .wrap:has(> .tesis-featured){display:flex;flex-direction:column;}
+.sec .wrap:has(> .tesis-featured) > .sec-head{order:-3;}
+.sec .wrap:has(> .tesis-featured) > .illu-bar{order:-2;margin-bottom:34px;}
+
+/* "Identidad · Editorial · Multimedia…" bajo el título: lo dicen
+   mejor los propios filtros que ahora quedan justo abajo */
+.sec .wrap:has(> .tesis-featured) .sec-head .sec-meta{display:none;}
+
+/* Cabecera de la tesis: fuera los rótulos repetidos y los números
+   crípticos ("39 · 5 · 2025"); el nombre y la categoría ya están
+   en la tarjeta destacada */
+.pj-tesis-slug .pj-tesis-slug-c,
+.pj-tesis-slug .pj-tesis-slug-r{display:none !important;}
+.dg-featured-badge{display:none !important;}   /* "★ Destacado" */
+.tesis-peek-eye{display:none !important;}      /* dupe de "Proyecto destacado · 2025" */
+
+/* GORILLAZ — fuera del listado (overrides.js renumera el resto) */
+.pj-gorillaz-simple{display:none !important;}
+
+/* ============================================================
+   ORDEN DE PROYECTOS EN DISEÑO GRÁFICO (pedido de Nacho):
+   tesis → sitios web → 9 Reinas → Motion → Koizone → resto → 3D
+   ============================================================ */
+.projects-list{display:flex;flex-direction:column;}
+.projects-list > *{order:6;}
+.projects-list > .pj-9r{order:1;}
+.projects-list > .pj.flip{order:2;}          /* Motion */
+.projects-list > .pj-koizone{order:3;}
+.projects-list > .pj-spider-simple{order:4;}
+.projects-list > .pj-posters{order:5;}
+
+/* ============================================================
+   DISEÑO WEB — sección nueva (la inyecta overrides.js justo
+   después de la tesis): demos de sitios hechos por iniciativa
+   propia. Grandes y del MISMO tamaño.
+   ============================================================ */
+.simp-web{margin-top:72px;margin-bottom:72px;}
+.simp-web-head{border-top:1px solid rgba(10,10,12,.35);padding-top:16px;margin-bottom:8px;}
+.simp-web-num{
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:#6b6a66;
+}
+.simp-web-head h3{
+  font-family:'Poppins',sans-serif;font-weight:700;
+  font-size:clamp(28px,3.6vw,54px);line-height:.96;letter-spacing:-.035em;
+  margin:6px 0 10px;color:var(--ink);
+}
+.simp-web-note{
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:#6b6a66;max-width:60ch;
+}
+.simp-web-grid{
+  display:grid;grid-template-columns:1fr;gap:64px;margin-top:34px;
+}
+.simp-web-item{margin:0;}
+.simp-web-item-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;
+  border-top:1px solid rgba(10,10,12,.35);
+  padding-top:14px;margin-bottom:16px;
+}
+.simp-web-tag{
+  display:block;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:#6b6a66;
+  margin-bottom:6px;
+}
+.simp-web-title{
+  display:block;font-family:'Poppins',sans-serif;font-weight:700;
+  font-size:clamp(22px,2.8vw,34px);line-height:1.05;letter-spacing:-.025em;
+  color:var(--ink);
+}
+.simp-web-sub{
+  font-family:'Poppins',sans-serif;font-weight:500;font-size:14.5px;
+  color:#6b6a66;max-width:52ch;
+}
+.simp-web-badge{
+  flex-shrink:0;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink);
+  border:1.5px solid var(--ink);padding:7px 12px;
+}
+/* video SIN recortar: ancho completo, altura natural */
+.simp-web-item video{
+  width:100%;height:auto;display:block;
+  border:1px solid rgba(10,10,12,.15);background:#0c0c0d;
+}
+
+/* CONTACTO — las tres tarjetas (mail / IG / WhatsApp) ya son clicables:
+   la fila de botones duplicados de abajo sobra */
+.contact-cta{display:none !important;}
+
+/* SERVICIOS — el panel usaba backdrop-filter blur(14px) sobre TODA la
+   página: eso desplomaba los FPS al abrirlo. Fondo sólido y listo */
+.svcov{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  background:rgba(10,10,10,.93) !important;
+}

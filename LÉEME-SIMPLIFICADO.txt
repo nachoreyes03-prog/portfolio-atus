@@ -1,0 +1,45 @@
+ATUS — VOL 2 SIMPLIFICADO (2026-08)
+===================================
+
+Qué es
+------
+Copia EXACTA del sitio publicado en nachoreyes.com, con una capa de
+reducción encima. El core (diseño, navegación, visores, animaciones,
+React) no se tocó: todo vive en dos archivos nuevos que se pueden
+editar o borrar sin riesgo:
+
+  overrides.css   menos ruido visual
+  overrides.js    menos texto
+
+(se cargan al final de index.html, son las únicas líneas agregadas)
+
+Qué reduce
+----------
+- Hero: chau tagline y mini-CTAs duplicados → logo + nombre + 2 tarjetas.
+- Hero: las tarjetas Diseño/Ilustración ahora SE NOTAN como botones
+  (borde marcado, chip "VER →", se levantan al hover).
+- Idiomas: solo ES a la vista (los botones EN/PT quedan ocultos).
+- Descripciones de proyectos: máximo 3 líneas (el texto completo sigue
+  en el código, solo se recorta la lectura).
+- Diseño Gráfico: el menú de categorías (Todos · Editorial…) pasó ARRIBA
+  de la tesis (es navegación de la página, no parte de la tesis).
+- Diseño Gráfico: fuera los rótulos repetidos de la entrada de la tesis
+  ("★ Destacado", eyebrow duplicado, "Palacio del Agua", "39 · 5 · 2025")
+  y el "Identidad · Editorial · Multimedia…" bajo el título.
+- Tesis: concepto en una frase corta completa (sin viuda).
+- Gorillaz: proyecto eliminado del listado; el resto renumerado (01–09)
+  y los contadores de filtros corregidos.
+- Viudas: text-wrap pretty en todos los párrafos y títulos.
+- Sobre mí: bio corta de una frase, sin segundo párrafo, sin "Edad".
+- Contacto: fuera la fila de botones que duplicaba las tres tarjetas.
+
+Ver en local
+------------
+powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
+→ http://localhost:8746
+(o desde Claude Code: preview "v2s")
+
+Publicar
+--------
+Subir la carpeta completa a GitHub Pages, igual que el sitio actual
+(el CNAME nachoreyes.com ya está incluido). Reemplaza al sitio online.

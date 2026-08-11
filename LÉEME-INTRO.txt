@@ -1,0 +1,63 @@
+ATUS — VOL 2 INTRO (2026-08)
+============================
+
+Qué es
+------
+Idéntica a "portfolio atus vol 2 simplificado" (misma capa de reducción,
+mismos rediseños web, mismo orden de proyectos) + la intro de graffiti,
+estilo camilaizuel.com pero en clave Atus.
+
+INTRO DE GRAFFITI (en cada carga/refresh de la página)
+------------------------------------------------------
+- Pantalla de papel con el aerosol de Atus (intro/aerosol.png — la
+  lata dibujada a marcador que pasó Nacho, con mix-blend-mode
+  multiply para que su blanco se funda con el papel) apoyada en el
+  medio. (intro/grafitti.svg quedó sin uso, se puede borrar.)
+- EASTER EGG: el personaje asoma (pop desde abajo a la izquierda) a
+  los 8 SEGUNDOS de cargada la página — mover el mouse no lo frena;
+  lo único que lo cancela es agarrar el aerosol (y una vez agarrado
+  no aparece más). SIEMPRE en español: "¿Vas a pintar o no?" en HTML
+  con JetBrains Mono (el texto vectorizado original se sacó del SVG;
+  easteregg-en.svg quedó sin uso).
+- DOBLE EASTER EGG: si le pegás al personaje, MIENTRAS mantenés el
+  click queda todo BLANCO (hit-flash de videojuego) con la pose de
+  golpeado (intro/easteregg-golpe.svg); al soltar se ve la cara de
+  golpeado y a los 0.3s se cae rápido de la pantalla girando (0.5s).
+  Solo se le puede pegar cuando asomó.
+- El spray tiene "presión" variable: el ancho del chorro deriva solo
+  mientras pintás (más gordo, más finito), además del temblor.
+- Colores: el gris de la lata y del personaje se pasó al papel del
+  fondo (#EDECEA) para que no se vea "otro blanco".
+- Agarrás el aerosol (click o toque) y pintás con trazo de spray:
+  chorro irregular (doble mancha), banda de grano pegada al borde,
+  salpicaduras lejanas y chorreadas que gotean. El chorro sale
+  ARRIBA A LA IZQUIERDA de la boquilla y la pintura queda siempre
+  detrás de la lata (nunca la tapa).
+- Se puede pintar libre, sin apuro. El logo y el botón son grandes.
+- Recién cuando el botón "Conocer a Atus ⟶" está pintado AL 100%
+  (él y un margen de 40px alrededor, con pintura bien cargada) el
+  resto del papel SE ABRE SOLO: queda la imagen entera, el aerosol
+  desaparece, vuelve el cursor y el botón late. Click → la pantalla
+  negra se CIERRA EN CÍRCULO hacia el botón y la página aparece
+  alrededor (nada de fade; fallback a fade en navegadores viejos).
+- "Saltar intro ⟶" abajo a la derecha para impacientes.
+- Funciona con mouse y con touch. Sin música (se sacó a pedido).
+
+Archivos propios (borrarlos = desaparece la feature):
+   intro.css · intro.js · intro/grafitti.svg
+   · intro/easteregg-es.svg · intro/easteregg-en.svg
+   · intro/easteregg-golpe.svg
+
+Ver en local
+------------
+powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
+→ http://localhost:8747
+(o desde Claude Code: preview "v2i")
+
+OJO: overrides.css y overrides.js son copia de los del vol 2
+simplificado — si se cambia algo ahí, copiar acá también.
+
+Publicar
+--------
+Subir la carpeta completa a GitHub Pages, igual que el sitio actual
+(el CNAME nachoreyes.com ya está incluido). Reemplaza al sitio online.

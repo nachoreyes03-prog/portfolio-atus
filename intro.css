@@ -1,0 +1,179 @@
+/* ============================================================
+   INTRO — aerosol que pinta la pantalla y revela el botón
+   (estilo camilaizuel.com pero en clave Atus)
+   + VINILO — música de fondo con toggle
+   ============================================================ */
+
+/* ---------- overlay de intro ---------- */
+#atus-intro{
+  position:fixed;inset:0;z-index:30000;
+  overflow:hidden;
+  background:#0c0c0d;              /* capa de abajo: tinta */
+  touch-action:none;
+  -webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity .6s ease;
+}
+#atus-intro.saliendo{opacity:0;pointer-events:none;}
+
+/* capa revelada (abajo): logo blanco + botón.
+   Sin pointer events hasta que se revela: así no se puede
+   clickear "a través del papel" sin querer */
+.intro-fondo{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:28px;text-align:center;padding:24px;
+  pointer-events:none;
+}
+.intro-fondo img{
+  width:min(580px,84vw);height:auto;
+  filter:brightness(0) invert(1);
+}
+.intro-btn{
+  appearance:none;cursor:pointer;background:none;
+  border:1.5px solid #f4f2ec;color:#f4f2ec;
+  padding:22px 46px;
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;
+  transition:background .2s,color .2s,transform .2s;
+  pointer-events:none;              /* recién funciona con el botón pintado entero */
+}
+/* botón listo: pintaste (casi) todo el botón → se activa y late */
+#atus-intro.lista .intro-btn{
+  pointer-events:auto;
+  animation:btn-late 1.6s ease-in-out infinite;
+}
+@keyframes btn-late{
+  0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(244,242,236,.25);}
+  50%{transform:scale(1.045);box-shadow:0 0 0 10px rgba(244,242,236,0);}
+}
+.intro-btn:hover{background:#f4f2ec;color:#0c0c0d;animation-play-state:paused;}
+.intro-fondo .intro-sub{
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:rgba(244,242,236,.5);
+}
+
+/* canvas de papel (arriba): se pinta con el aerosol.
+   Nunca captura clicks: los gestos van al overlay */
+#intro-canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;
+}
+#atus-intro.agarrado{cursor:none;}
+
+/* pista inicial */
+.intro-hint{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-160px);
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;
+  letter-spacing:.24em;text-transform:uppercase;color:#6b6a66;
+  pointer-events:none;
+  transition:opacity .3s;
+  text-align:center;
+}
+#atus-intro.agarrado .intro-hint{opacity:0;}
+
+/* el aerosol: apoyado al medio; agarrado, sigue el puntero
+   (la boquilla queda en el punto exacto del cursor). Sin sombra:
+   plano, como el dibujo */
+#intro-aerosol{
+  position:absolute;left:50%;top:50%;
+  width:145px;height:auto;
+  mix-blend-mode:multiply;      /* el blanco del dibujo se funde con el papel */
+  transform:translate(-50%,-45%) rotate(8deg);
+  cursor:grab;
+  transition:transform .2s;
+  z-index:2;
+}
+#intro-aerosol:hover{transform:translate(-50%,-45%) rotate(8deg) scale(1.06);}
+#atus-intro.agarrado #intro-aerosol{
+  pointer-events:none;cursor:none;
+  transition:none;
+  /* boquilla de la lata nueva (Frame 2): 53.5% del ancho, 6.7% del alto */
+  transform:translate(-53.5%,-6.7%) rotate(-14deg);
+  transform-origin:53.5% 6.7%;
+  /* pintando, blend normal: la pintura negra queda DETRÁS de la
+     lata y no la tapa (multiply la volvía negra sobre lo pintado) */
+  mix-blend-mode:normal;
+}
+/* botón listo → el aerosol desaparece y vuelve el cursor normal */
+#atus-intro.lista{cursor:default;}
+#atus-intro.lista #intro-aerosol{
+  opacity:0;pointer-events:none;
+  transition:opacity .45s ease;
+}
+/* easter egg: el personaje que pregunta si vas a pintar.
+   Solo aparece tras ~12s sin tocar nada (lo dispara intro.js con la
+   clase .asoma); al agarrar el aerosol se esconde */
+.intro-egg{
+  position:absolute;left:14px;bottom:0;
+  width:min(320px,44vw);
+  z-index:1;pointer-events:none;
+  transform:translateY(108%);
+  transition:transform .45s ease-in;
+}
+/* el personaje se puede tocar (segundo easter egg: el golpe) */
+.intro-egg img{width:100%;height:auto;display:block;pointer-events:auto;cursor:pointer;}
+.intro-egg .intro-egg-txt{
+  display:block;
+  margin:0 0 6px 32%;
+  max-width:230px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:15px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:#0c0c0d;line-height:1.5;
+  transform:rotate(-3deg);
+}
+.intro-egg.asoma{
+  transform:translateY(0);
+  animation:egg-pop .85s cubic-bezier(.2,.9,.3,1.18) both;
+}
+@keyframes egg-pop{
+  0%{transform:translateY(108%);}
+  100%{transform:translateY(0);}
+}
+
+/* segundo easter egg: le pegaste — cara de golpeado, tiembla,
+   y al segundo se cae fuera de la pantalla */
+.intro-egg.golpeado{
+  animation:egg-golpe .45s ease-out;
+}
+@keyframes egg-golpe{
+  0%{transform:translateY(0) rotate(0);}
+  25%{transform:translate(-7px,3px) rotate(-3.5deg);}
+  55%{transform:translate(6px,1px) rotate(2.5deg);}
+  80%{transform:translate(-3px,0) rotate(-1deg);}
+  100%{transform:translateY(0) rotate(0);}
+}
+/* mientras mantenés el click: hit-flash blanco, como en los juegos */
+.intro-egg.flash img{filter:brightness(0) invert(1);}
+
+.intro-egg.cae{
+  animation:egg-cae .5s cubic-bezier(.5,0,.85,.4) forwards;
+  pointer-events:none;
+}
+.intro-egg.cae img{pointer-events:none;}
+@keyframes egg-cae{
+  0%{transform:translateY(0) rotate(0);}
+  100%{transform:translateY(140%) rotate(22deg);}
+}
+
+#atus-intro.agarrado .intro-egg{animation:none;}
+
+/* saltear */
+.intro-saltar{
+  position:absolute;right:26px;bottom:22px;
+  appearance:none;background:none;border:none;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;color:#6b6a66;
+  border-bottom:1.5px solid transparent;padding:4px 0;
+  transition:color .2s,border-color .2s;
+  z-index:3;
+}
+.intro-saltar:hover{color:#0c0c0d;border-color:#6b6a66;}
+
+@media (max-width:760px){
+  #intro-aerosol{width:114px;}
+  .intro-hint{transform:translate(-50%,-140px);padding:0 30px;}
+  .intro-egg{width:min(300px,58vw);}
+  .intro-btn{padding:18px 34px;font-size:12.5px;}
+}
