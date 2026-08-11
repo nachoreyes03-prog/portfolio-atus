@@ -119,6 +119,15 @@
         cnt.textContent = (cnt.textContent || '').replace('10', '9');
         cnt.dataset.simp = '1';
       }
+      /* banda "Explora mis trabajos": PRIMERA hija de las tarjetas,
+         ocupando las dos columnas (no tocar la grilla del hero) */
+      var tarjetas = document.querySelector('.hero-section-cards');
+      if (tarjetas && !tarjetas.querySelector('.simp-explora')){
+        var banda = document.createElement('div');
+        banda.className = 'simp-explora';
+        banda.textContent = 'Explora mis trabajos';
+        tarjetas.insertBefore(banda, tarjetas.firstChild);
+      }
       /* reordenado por estilos inline: el CSS usa :has(), que Safari
          viejo (iPhone) no soporta — esto funciona en todos lados */
       /* (se re-aplica en cada render: el observer solo mira childList,

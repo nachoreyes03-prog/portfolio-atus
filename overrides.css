@@ -10,25 +10,57 @@
 .hero-tagline{display:none !important;}
 .hero-mini-ctas{display:none !important;}   /* duplican Sobre mí / Contacto del nav */
 
-/* HERO — que las tarjetas se NOTEN como botones:
-   borde marcado + chip "VER →" + levantan al pasar el mouse */
+/* HERO — logo más chico (25vh, como el mockup); el resto de la fila
+   elástica lo sube solo */
+.hero-landing .hero-logo{max-height:30vh !important;}
+/* bajar un poco el bloque logo + nombre */
+.hero-landing .hero-main{padding-top:7vh;padding-bottom:14px;}
+.hero-landing .hero-sub{font-size:clamp(17px,1.35vw,22px) !important;}
+/* tarjetas pegadas entre sí y a la banda; cuando sobra altura, el
+   grid NO estira las filas (estiraba la banda y quedaba un espacio
+   gigante bajo el texto): todo anclado abajo, el aire va arriba */
+.hero-section-cards{gap:0 !important;align-content:end !important;}
+
+/* HERO — tarjetas un 25% más altas que el original, con botón sólido
+   "Ver más" arriba a la derecha (negro en la clara, blanco en la oscura) */
 .hero-card{
-  border:1.5px solid var(--ink) !important;
   position:relative;
+  min-height:32.5vh !important;    /* original 26vh + 25% */
   transition:background .25s,color .25s,transform .25s,box-shadow .25s !important;
 }
 .hero-card::after{
-  content:'VER →';
-  position:absolute;top:14px;right:14px;
-  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
-  letter-spacing:.16em;
-  border:1.5px solid currentColor;
-  padding:6px 10px;
-  transition:background .2s,color .2s;
+  content:'Ver más';
+  position:absolute;top:24px;right:32px;
+  font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;
+  letter-spacing:.01em;
+  padding:10px 24px;
+  transition:transform .2s,opacity .2s;
 }
+.hero-card-design::after{background:var(--ink);color:var(--paper);}
+.hero-card-illu::after{background:var(--paper);color:var(--ink);}
 .hero-card:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(10,10,12,.14);}
-.hero-card-design:hover::after{background:var(--ink);color:var(--paper);border-color:var(--ink);}
-.hero-card-illu:hover::after{background:var(--paper);color:var(--ink);border-color:var(--paper);}
+.hero-card:hover::after{transform:translateY(-2px);}
+
+/* banda "Explora mis trabajos" pegada arriba de las tarjetas.
+   Va DENTRO de .hero-section-cards ocupando las dos columnas
+   (como hija suelta de la grilla del hero rompía las filas y
+   dejaba un espacio muerto enorme) */
+.simp-explora{
+  grid-column:1 / -1;
+  width:100%;
+  background:var(--paper);
+  border-top:1.5px solid var(--ink);
+  border-bottom:1.5px solid var(--ink);
+  padding:14px 36px;
+  display:flex;align-items:center;   /* mismo aire arriba y abajo del texto */
+  font-family:'Poppins',sans-serif;font-weight:700;
+  font-size:clamp(22px,1.6vw,30px);letter-spacing:-.02em;
+  color:var(--ink);
+}
+@media (max-width:760px){
+  .simp-explora{padding:12px 20px;font-size:20px;}
+  .hero-card::after{top:14px;right:16px;padding:8px 16px;font-size:13px;}
+}
 
 /* IDIOMAS — una sola lengua a la vista (ES por defecto): menos botones */
 .lang-btn{display:none !important;}
