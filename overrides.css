@@ -15,25 +15,8 @@
 .hero-landing .hero-main{padding-top:3vh;padding-bottom:14px;}
 .hero-landing .hero-sub{font-size:clamp(17px,1.35vw,22px) !important;}
 
-/* botón Contacto debajo del nombre: es el mini-CTA original del sitio
-   (navega bien en la SPA), mostrado solo y vestido de botón sólido */
-.hero-mini-ctas{
-  display:flex !important;
-  justify-content:center;
-  margin-top:22px;
-}
-.hero-mini-ctas .mini-cta:first-child{display:none;}   /* fuera "Sobre mí" */
-.hero-mini-ctas .mini-cta{
-  background:var(--ink);
-  color:var(--paper) !important;
-  border:none !important;
-  padding:13px 32px;
-  font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;
-  letter-spacing:.01em;text-decoration:none !important;
-  transition:transform .2s,opacity .2s;
-}
-.hero-mini-ctas .mini-cta:hover{transform:translateY(-2px);}
-.hero-mini-ctas .mini-cta span{display:none;}   /* sin flecha */
+/* sin mini-CTAs en el hero (el Contacto del nav alcanza) */
+.hero-mini-ctas{display:none !important;}
 /* tarjetas pegadas entre sí y a la banda; cuando sobra altura, el
    grid NO estira las filas (estiraba la banda y quedaba un espacio
    gigante bajo el texto): todo anclado abajo, el aire va arriba */
