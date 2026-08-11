@@ -281,11 +281,19 @@
   });
   intro.addEventListener('mouseleave', function(){ prev = null; });
 
-  /* touch: agarra al primer toque, pinta al arrastrar */
+  /* touch: agarra SOLO si tocás la lata (con margen generoso).
+     Antes cualquier toque en la pantalla la agarraba y cancelaba
+     el timer del personaje: en mobile no aparecía nunca */
   intro.addEventListener('touchstart', function(e){
+    if (agarrado) return;
     var t = e.touches[0];
-    agarrar(t.clientX, t.clientY);
-    prev = null;
+    var r = aerosol.getBoundingClientRect();
+    var M = 34;
+    if (t.clientX > r.left - M && t.clientX < r.right + M &&
+        t.clientY > r.top - M && t.clientY < r.bottom + M){
+      agarrar(t.clientX, t.clientY);
+      prev = null;
+    }
   }, {passive:true});
   intro.addEventListener('touchmove', function(e){
     if (!agarrado || revelada) return;
