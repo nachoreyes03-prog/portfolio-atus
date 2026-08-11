@@ -2265,7 +2265,7 @@ function IlluSection({
   }, COMIC.map((p, i) => /*#__PURE__*/React.createElement("div", {
     key: p.id,
     className: "cpage",
-    onClick: () => onReadComic(i, 'book')
+    onClick: () => onReadComic(i, window.innerWidth <= 760 ? 'single' : 'book')
   }, /*#__PURE__*/React.createElement("img", {
     src: p.img,
     alt: `Gero ${p.n}`,
