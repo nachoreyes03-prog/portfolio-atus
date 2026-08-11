@@ -47,7 +47,7 @@
   var eggEl = intro.querySelector('.intro-egg');
   var eggTimer = setTimeout(function(){
     if (!agarrado) eggEl.classList.add('asoma');
-  }, 8000);
+  }, 5000);
 
   /* segundo easter egg: le pegás → mientras mantenés el click el
      personaje queda EN BLANCO (hit-flash); al soltar aparece la cara

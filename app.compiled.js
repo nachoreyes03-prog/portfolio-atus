@@ -1894,7 +1894,7 @@ function DesignSection({
   // como el cover de Animación. 1 carrusel por proyecto (low-poly / high-poly).
   const render3DRoomCard = (p, num, totalStr) => {
     const imgs = p.assets.filter(a => a.type === 'img');
-    const poly = /hp|high/i.test(p.id + p.cat) ? 'High-poly' : 'Low-poly';
+    const poly = /auto/i.test(p.id) ? 'Retrofuturista' : /hp|high/i.test(p.id + p.cat) ? 'High-poly' : 'Low-poly';
     return /*#__PURE__*/React.createElement("article", {
       key: p.id,
       className: "pj-3d pj-3d-room",
@@ -2010,7 +2010,7 @@ function DesignSection({
     if (p.feature3d) return /*#__PURE__*/React.createElement(React.Fragment, {
       key: p.id
     }, banner, render3DCard(p, num, totalStr));
-    if (p.id === '3d-spider-hp' || p.id === '3d-spider-lp') return /*#__PURE__*/React.createElement(React.Fragment, {
+    if (p.id === '3d-spider-hp' || p.id === '3d-spider-lp' || p.id === '3d-auto') return /*#__PURE__*/React.createElement(React.Fragment, {
       key: p.id
     }, banner, render3DRoomCard(p, num, totalStr));
     return /*#__PURE__*/React.createElement(React.Fragment, {

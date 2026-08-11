@@ -15,8 +15,10 @@
      números originales "XX / 10" se remapean al orden visual nuevo.
      Se recorren NODOS DE TEXTO (algunos números conviven con más
      texto en el mismo elemento). */
-  var MAPA_NUM = {1:1, 2:3, 4:4, 5:5, 6:2, 7:6, 8:7, 9:8};   /* orig → nuevo (3 = Gorillaz, fuera) */
-  var TOTAL_NUEVO = '09';
+  /* originales 1..11 (con el auto partido en fotos + videos);
+     3 = Gorillaz, fuera */
+  var MAPA_NUM = {1:1, 2:3, 4:4, 5:5, 6:2, 7:6, 8:7, 9:8, 10:9};
+  var TOTAL_NUEVO = '10';
 
   function esContadorDeVideos(nodo){
     var p = nodo.parentElement;
@@ -32,13 +34,13 @@
     var barras = [];                             /* React parte "01" + " / " + "10" */
     while ((nodo = walker.nextNode())){
       var t = nodo.nodeValue || '';
-      if (/\d{2}\s*\/\s*10/.test(t)){ enteros.push(nodo); continue; }
+      if (/\d{2}\s*\/\s*11/.test(t)){ enteros.push(nodo); continue; }
       if (/\/\s*$/.test(t)) barras.push(nodo);
     }
-    /* caso 1: "01 / 10 — 2025" en un solo nodo */
+    /* caso 1: "01 / 11 — 2025" en un solo nodo */
     enteros.forEach(function(n){
       if (esContadorDeVideos(n)) return;
-      n.nodeValue = n.nodeValue.replace(/(\d{2})(\s*\/\s*)10/g, function(todo, num, sep){
+      n.nodeValue = n.nodeValue.replace(/(\d{2})(\s*\/\s*)11/g, function(todo, num, sep){
         var nuevo = MAPA_NUM[parseInt(num, 10)];
         return nuevo ? ('0' + nuevo).slice(-2) + sep + TOTAL_NUEVO : todo;
       });
@@ -48,7 +50,7 @@
     barras.forEach(function(b){
       if (esContadorDeVideos(b)) return;
       var nextN = b.nextSibling;
-      if (!nextN || nextN.nodeType !== 3 || !/^\s*10\s*$/.test(nextN.nodeValue || '')) return;
+      if (!nextN || nextN.nodeType !== 3 || !/^\s*11\s*$/.test(nextN.nodeValue || '')) return;
       var numNode = null, m = (b.nodeValue || '').match(/(\d{2})\s*\/\s*$/);
       if (m){
         numNode = b;                             /* "…01/" + "10" */
@@ -63,7 +65,7 @@
       var nuevo = MAPA_NUM[parseInt(m[1], 10)];
       if (!nuevo) return;
       numNode.nodeValue = numNode.nodeValue.replace(/(\d{2})([\s\/]*)$/, ('0' + nuevo).slice(-2) + '$2');
-      nextN.nodeValue = nextN.nodeValue.replace('10', TOTAL_NUEVO);
+      nextN.nodeValue = nextN.nodeValue.replace('11', TOTAL_NUEVO);
     });
   }
 
@@ -111,12 +113,12 @@
         var nEl = ch.querySelector('.n');
         if (!nEl || nEl.dataset.simp) continue;
         var label = ch.textContent || '';
-        if (/^\s*Todos/.test(label)){ nEl.textContent = '(9)'; nEl.dataset.simp = '1'; }
+        if (/^\s*Todos/.test(label)){ nEl.textContent = '(10)'; nEl.dataset.simp = '1'; }
         else if (/^\s*Editorial/.test(label)){ nEl.textContent = '(3)'; nEl.dataset.simp = '1'; }
       }
       var cnt = document.querySelector('.illu-count');
-      if (cnt && !cnt.dataset.simp && /^\s*10 proyectos/.test(cnt.textContent || '')){
-        cnt.textContent = (cnt.textContent || '').replace('10', '9');
+      if (cnt && !cnt.dataset.simp && /^\s*11 proyectos/.test(cnt.textContent || '')){
+        cnt.textContent = (cnt.textContent || '').replace('11', '10');
         cnt.dataset.simp = '1';
       }
       /* banda "Explora mis trabajos": PRIMERA hija de las tarjetas,
@@ -146,7 +148,12 @@
           for (var h = 0; h < pl.children.length; h++){
             var hijo = pl.children[h];
             var cl = String(hijo.className);
-            if (/\bpj\b/.test(cl) && /\bflip\b/.test(cl)){ hijo.style.order = '2'; continue; }
+            if (/\bpj\b/.test(cl) && /\bflip\b/.test(cl)){
+              /* dos tarjetas "flip": Motion va arriba (2), las
+                 animaciones del auto van con el bloque 3D (6) */
+              hijo.style.order = /Retrofutur/i.test(hijo.textContent || '') ? '6' : '2';
+              continue;
+            }
             var puesto = '6';
             for (var key in ORDEN){ if (cl.indexOf(key) !== -1){ puesto = ORDEN[key]; break; } }
             hijo.style.order = puesto;
@@ -217,6 +224,19 @@
     queued = true;
     setTimeout(function(){ queued = false; apply(); }, 60);
   }
+
+  /* pósters en mobile: al elegir una mini, subir hasta la portada
+     para ver el cambio */
+  document.addEventListener('click', function(ev){
+    var mini = ev.target && ev.target.closest ? ev.target.closest('.pj-poster-mini') : null;
+    if (!mini || window.innerWidth > 760) return;
+    setTimeout(function(){
+      var hero = document.querySelector('.pj-posters-hero');
+      if (hero){
+        window.scrollTo({ top: hero.getBoundingClientRect().top + window.pageYOffset - 74, behavior: 'smooth' });
+      }
+    }, 90);
+  });
 
   var app = document.getElementById('app');
   if (app){

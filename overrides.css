@@ -59,8 +59,27 @@
   color:var(--ink);
 }
 @media (max-width:760px){
-  .simp-explora{padding:12px 20px;font-size:20px;}
-  .hero-card::after{top:14px;right:16px;padding:8px 16px;font-size:13px;}
+  /* HOME COMPACTO: en mobile estaba todo muy grande; con esto las
+     dos cajas entran en el primer pantallazo */
+  .hero-landing .hero-logo{max-height:14vh !important;}
+  .hero-landing .hero-main{padding-top:0;padding-bottom:6px;}
+  .hero-landing .hero-sub{font-size:14px !important;}
+  .hero-card{min-height:19.5vh !important;padding:14px 18px 12px !important;}
+  .hero-card-title{font-size:25px !important;}
+  .hero-card-k{font-size:9px !important;}
+  .hero-card-meta{font-size:8.5px !important;}
+  .simp-explora{padding:9px 18px;font-size:17px;}
+  .hero-card::after{top:10px;right:14px;padding:7px 14px;font-size:12px;}
+
+  /* CÓMIC: solo "Página por página" (el modo libro se ve mal en teléfono) */
+  .comic-cta button:first-child{display:none !important;}
+
+  /* VISOR DE ILUSTRACIONES: un solo juego de botones (fuera el de abajo) */
+  .modal-mini{display:none !important;}
+
+  /* REDISEÑOS WEB: menos texto, que hablen los videos */
+  .simp-web-note{display:none !important;}
+  .simp-web-sub{display:none !important;}
 }
 
 /* IDIOMAS — una sola lengua a la vista (ES por defecto): menos botones */
@@ -105,6 +124,9 @@
 
 /* GORILLAZ — fuera del listado (overrides.js renumera el resto) */
 .pj-gorillaz-simple{display:none !important;}
+
+/* banner "↳ Sección 3D / Modelado…" — texto de más, fuera */
+.pj-group-banner{display:none !important;}
 
 /* ============================================================
    ORDEN DE PROYECTOS EN DISEÑO GRÁFICO (pedido de Nacho):
