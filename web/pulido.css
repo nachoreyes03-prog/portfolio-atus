@@ -217,6 +217,8 @@ html.lenis, html.lenis body{ height:auto; }
   --rule-soft:rgba(244,242,236,.08) !important;
 }
 html, body{ background:#0a0907 !important; color:#f4f2ec; }
+/* iPhone: que Safari no agrande la letra por su cuenta (el tamaño es el que dice el CSS, como en Android) */
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 .sec-dark::before{ display:none !important; }
 
 /* logo del inicio: era negro sobre papel (multiply); ahora blanco */

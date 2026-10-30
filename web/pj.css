@@ -51,6 +51,12 @@
   /* el borde donde apoya las manos (73 % del dibujo) queda justo en el borde de la foto */
   #about .about-l.apj-col .apj{ position:relative; left:6px; width:min(250px, 66%); margin:92px 0 calc(min(250px, 66vw) * -0.16); }
   .apj-txt{ font-size:16px; left:26%; }
+  /* la foto: en iPhone (Safari) la caja estirada ignoraba su proporción 4:3 y, como la imagen va
+     en posición absoluta, quedaba con 0 de alto (la foto no se veía). Sin estirar, toma su alto */
+  #about .about-r{ align-self:start; }
+}
+@supports not (aspect-ratio: 4 / 3){
+  #about .about-r{ height:0; padding-top:75%; }
 }
 
 /* ---------- ojos que siguen al mouse (ojos.js) ----------
