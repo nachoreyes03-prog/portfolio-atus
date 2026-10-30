@@ -1,0 +1,242 @@
+/* ============================================================
+   OPCIÓN A — SERVICIOS COMO RECIBO TÉRMICO (ver servicios.js)
+   Recibo ancho y derecho, con los servicios en dos columnas para
+   que no sea tan largo. Sale enrollado y se desenrolla a medida
+   que bajás. La impresión pasa por el filtro #tk-tinta (sangrado y
+   desgaste); los tildes de lapicera van sin filtro.
+   ============================================================ */
+
+/* el banner chico y el panel viejo se ocultan */
+.tk-sec > .wrap, .tk-sec .svcov{ display:none !important; }
+.tk-sec{ padding:120px 0 150px !important; overflow:hidden; }
+.tk-defs{ position:absolute; width:0; height:0; overflow:hidden; }
+
+.tk{
+  --tk-ink:#1a1a1a; --tk-paper:#fafafa; /* blanco neutro de papel térmico, sin crema */
+  position:relative;
+  width:800px; margin:0 auto; transform-origin:50% 0; /* ancho fijo: servicios.js lo escala si no entra */
+  font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace; color:var(--tk-ink);
+}
+.tk button{ font:inherit; color:inherit; background:none; border:0; padding:0; margin:0; text-align:left; cursor:pointer; }
+
+/* papel térmico: blanco apenas gris, bordes que se curvan, un relieve muy suave
+   de papel manipulado (luz sobre ruido, no una foto repetida) y grano fino;
+   dientes arriba y abajo */
+.tk-papel{
+  --z:12px;
+  position:relative; padding:60px 64px 54px;
+  background-color:var(--tk-paper);
+  background-image:
+    linear-gradient(90deg, rgba(0,0,0,.06), rgba(0,0,0,0) 3%, rgba(0,0,0,0) 97%, rgba(0,0,0,.07)),
+    linear-gradient(180deg, rgba(255,255,255,.45), rgba(0,0,0,.025));
+  -webkit-mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / var(--z) 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--z) 51% repeat-x;
+          mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / var(--z) 51% repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--z) 51% repeat-x;
+}
+.tk-papel::before{
+  content:''; position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none;
+  opacity:.42; mix-blend-mode:multiply;
+  background-image:url("tk/grano.png"), url("tk/arrugas.png");
+  background-size:180px 180px, 640px 640px;
+}
+.tk-papel > *{ position:relative; }
+
+/* la tinta (.tk-vivo: lo que cambia en vivo: fecha, hora, total, código) */
+.tk-ink, .tk-vivo{ filter:url(#tk-tinta); }
+.tk--sf .tk-ink, .tk--sf .tk-vivo{ filter:none; text-shadow:0 0 .7px rgba(0,0,0,.55); }
+
+/* papel como foto (servicios.js, cuando está el 3D): la imagen del recibo con la
+   tinta ya impresa hace de papel; el texto real queda invisible encima (se puede
+   tildar y leer) y sólo se ve lo que cambia. Así el scroll no recalcula filtros */
+.tk--foto .tk-papel{ background-color:transparent; background-size:100% 100%; background-repeat:no-repeat; }
+.tk--foto .tk-papel::before{ display:none; }
+.tk--foto .tk-ink{ opacity:0; }
+
+/* entrada suave (el resto lo hace el rollo) */
+.tk .tk-papel{ opacity:0; transition:opacity .6s ease; }
+.tk.is-in .tk-papel{ opacity:1; }
+
+/* ---------- el rollo ----------
+   una cortina del color de la sección tapa lo que todavía no salió; en su
+   borde, el rollo: del mismo ancho que el papel, lados rectos, sombreado de
+   cilindro y la sombra donde el papel se enrolla. El grosor lo pone servicios.js
+   (cuanto más papel queda adentro, más gordo). */
+.tk-telon{
+  position:absolute; left:-56px; right:-56px; top:0; height:calc(100% + 140px);
+  z-index:4; will-change:transform; cursor:pointer; outline:none;
+}
+.tk-telon__i{ position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(10,9,7,.99); }
+.tk-rollo{
+  --d:104px;
+  position:absolute; left:56px; right:56px; top:calc(var(--d) * -0.32); height:var(--d);
+  transition:opacity .45s ease;
+}
+/* el papel se curva para entrar al rollo: sombra suave sobre el papel, justo arriba */
+.tk-rollo::before{
+  content:''; position:absolute; left:0; right:0; bottom:100%; height:36px; pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.07) 55%, rgba(0,0,0,.17));
+}
+/* sombra contra el fondo */
+.tk-rollo::after{
+  content:''; position:absolute; left:4%; right:4%; top:86%; height:30px; pointer-events:none;
+  background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.7), rgba(0,0,0,0));
+}
+/* el cuerpo del rollo: cilindro de papel con luz de arriba */
+.tk-rollo__cuerpo{
+  position:absolute; top:0; bottom:0; left:calc(var(--d) * .14); right:calc(var(--d) * .14); z-index:1;
+  background:
+    url("tk/grano.png"),
+    linear-gradient(180deg, #d9d9d9 0%, #f4f4f4 9%, #ffffff 21%, #fafafa 33%, #ebebeb 50%, #d3d3d3 68%, #b5b5b5 84%, #959595 95%, #7e7e7e 100%);
+  background-size:180px 180px, 100% 100%;
+}
+/* las puntas: se ven las vueltas del papel y el centro */
+.tk-rollo__tapa{
+  position:absolute; top:0; height:100%; width:calc(var(--d) * .3); border-radius:50%; z-index:2;
+  background:
+    radial-gradient(closest-side, #3a3a3a 0 15%, #8a8a8a 16% 21%, rgba(0,0,0,0) 22%),
+    repeating-radial-gradient(closest-side, #f6f6f6 0 1.3px, #d6d6d6 1.3px 2px);
+  box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.2), inset -3px -5px 9px rgba(0,0,0,.2);
+}
+.tk-rollo__tapa--i{ left:0; }
+.tk-rollo__tapa--d{ right:0; }
+/* mientras está enrollado, cada tanto asoma un poquito más de papel (se puede tirar) */
+.tk:not(.is-tocado) .tk-telon__i{ animation:tkTiron 3.6s 1.6s cubic-bezier(.45,0,.25,1) infinite; }
+@keyframes tkTiron{ 0%,70%,100%{ transform:translateY(0); } 80%{ transform:translateY(20px); } 89%{ transform:translateY(6px); } }
+@media (hover:hover){
+  .tk:not(.is-abierto) .tk-telon:hover .tk-telon__i{ animation:none; transform:translateY(14px); transition:transform .35s cubic-bezier(.2,.8,.2,1); }
+}
+.tk-telon:focus-visible .tk-rollo{ outline:2px dashed #f4f2ec; outline-offset:8px; }
+.tk.is-abierto .tk-telon{ pointer-events:none; cursor:default; }
+.tk.is-abierto .tk-rollo{ opacity:0; }
+
+/* ---------- cabecera del local ---------- */
+.tk-head{ text-align:center; }
+.tk-logo{ display:block; height:74px; width:auto; margin:0 auto 18px; filter:brightness(0); }
+.tk-slogan{ margin:0; font-size:20px; font-weight:500; }
+.tk-local{ margin:6px 0 0; font-size:16px; }
+.tk-title{ margin:30px 0 16px; font-size:40px; font-weight:800; line-height:1; letter-spacing:.18em; text-transform:uppercase; }
+/* doble alto, como imprimen los títulos las impresoras de tickets */
+.tk-title span{ display:inline-block; transform:scaleY(1.6); transform-origin:50% 60%; }
+
+.tk-sep{ display:flex; justify-content:center; overflow:hidden; white-space:nowrap; margin:18px 0; font-size:17px; line-height:1; }
+.tk-meta{ display:flex; justify-content:space-between; margin:0; font-size:17px; text-transform:uppercase; }
+.tk-hint{ margin:8px 0 14px; text-align:center; font-size:17px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+.tk-hint::before, .tk-hint::after{ content:'↓'; margin:0 12px; }
+
+/* ---------- ítems para tildar: una sola columna ---------- */
+.tk-list{ list-style:none; margin:0 -16px; padding:0; }
+.tk-row + .tk-row{ border-top:1px dashed rgba(28,28,27,.2); }
+.tk .tk-item{
+  /* flex en columna: el contenido arranca arriba (un botón lo centraría) */
+  position:relative; display:flex; flex-direction:column; justify-content:flex-start; align-items:stretch;
+  width:100%; height:100%; padding:20px 16px 19px; border-radius:8px;
+  transition:background-color .2s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.tk .tk-item:focus-visible{ outline:2px dashed var(--tk-ink); outline-offset:-2px; }
+/* que se note que se puede tildar: la fila se sombrea y el casillero se marca */
+@media (hover:hover){
+  .tk .tk-item:hover{ background:rgba(28,28,27,.075); }
+  .tk .tk-item:hover .tk-box{ box-shadow:inset 0 0 0 2px var(--tk-ink); }
+}
+.tk .tk-item:active{ background:rgba(28,28,27,.11); }
+.tk .tk-item.is-on{ background:rgba(28,28,27,.045); }
+.tk-line{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; column-gap:15px; align-items:start; font-size:19px; font-weight:700; line-height:1.3; text-transform:uppercase; }
+.tk-box{ display:block; width:23px; height:23px; margin-top:0; border:2.5px solid var(--tk-ink); }
+.tk-num{ font-weight:500; }
+.tk-desc{ display:block; margin-top:9px; padding-left:38px; font-size:15.5px; line-height:1.6; }
+.tk-desc b{ display:block; margin-top:5px; font-weight:800; text-transform:uppercase; }
+
+/* tilde de birome (servicios.js lo dibuja distinto cada vez; sin el filtro de impresión) */
+.tk-tilde{ position:absolute; overflow:visible; pointer-events:none; transition:opacity .25s ease; }
+.tk-tilde.is-fuera{ opacity:0; }
+.tk-tilde__tinta{ fill:#16182a; opacity:.94; filter:url(#tk-boli); }
+
+/* ---------- totales ---------- */
+.tk-tot p{ display:flex; align-items:baseline; gap:10px; margin:10px 0; font-size:18px; text-transform:uppercase; }
+.tk-tot i{ flex:1 1 auto; min-width:16px; border-bottom:2px dotted currentColor; opacity:.5; transform:translateY(-5px); }
+.tk-tot b{ white-space:nowrap; }
+.tk-tot .tk-tot__big{ font-size:25px; font-weight:800; }
+
+/* ---------- pedido ---------- */
+.tk-ask{ margin:26px 0 18px; text-align:center; font-size:20px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+.tk-send{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+/* los botones van sin el filtro (las manchas quedaban raras en el negro lleno):
+   negro parejo de impresora térmica, con algún puntito sin tinta (sin sombras
+   borrosas: trababan el scroll) */
+.tk-btn{
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:20px 22px; border:2.5px solid var(--tk-ink); color:var(--tk-ink); text-decoration:none;
+  font-size:16.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; line-height:1.1;
+  transition:background-color .2s, color .2s;
+  text-shadow:0 0 .6px currentColor;
+}
+.tk-btn--wpp{
+  background-color:var(--tk-ink); color:var(--tk-paper);
+  /* puntitos sin tinta: una imagen hecha (un SVG con ruido se recalculaba al
+     dibujarse y trababa el scroll un cuadro entero) */
+  background-image:url("tk/puntos.png");
+  background-size:160px 160px;
+}
+.tk-btn span{ transition:transform .25s cubic-bezier(.2,.8,.2,1); }
+@media (hover:hover){
+  .tk-btn--wpp:hover{ background:#000; }
+  .tk-btn--mail:hover{ background:var(--tk-ink); color:var(--tk-paper); }
+  .tk-btn:hover span{ transform:translateX(6px); }
+}
+.tk-mailtxt{ display:block; margin-top:16px; text-align:center; font-size:16px; color:var(--tk-ink); text-decoration:none; }
+.tk-gracias{ margin:34px 0 20px; text-align:center; font-size:28px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; }
+.tk-barcode{ width:50%; height:72px; margin:0 auto; }
+.tk-barcode svg{ display:block; width:100%; height:100%; fill:var(--tk-ink); }
+.tk-code{ margin:11px 0 0; text-align:center; font-size:15px; letter-spacing:.26em; }
+
+
+
+/* ---------- celular ---------- */
+@media (max-width:760px){
+  .tk-sec{ padding:72px 0 90px !important; }
+  .tk{ width:366px; }
+  .tk-papel{ --z:8px; padding:34px 20px 30px; }
+  .tk-logo{ height:50px; margin-bottom:12px; }
+  .tk-slogan{ font-size:14.5px; }
+  .tk-local{ font-size:13px; }
+  .tk-title{ font-size:25px; margin:20px 0 10px; }
+  .tk-sep, .tk-meta, .tk-hint{ font-size:13px; }
+  .tk-sep{ margin:13px 0; }
+  .tk-list{ margin:0 -8px; }
+  .tk .tk-item{ padding:15px 8px 14px; }
+  .tk-line{ font-size:15px; column-gap:11px; }
+  .tk-box{ width:19px; height:19px; border-width:2px; }
+  .tk-desc{ padding-left:30px; font-size:13.5px; line-height:1.55; margin-top:6px; }
+  .tk-tot p{ font-size:14px; }
+  .tk-tot .tk-tot__big{ font-size:18px; }
+  .tk-ask{ font-size:15px; }
+  .tk-send{ grid-template-columns:1fr; gap:10px; }
+  .tk-btn{ font-size:13.5px; padding:16px 14px; }
+  .tk-mailtxt{ font-size:13.5px; }
+  .tk-gracias{ font-size:21px; margin:26px 0 14px; }
+  .tk-barcode{ width:76%; height:52px; }
+  .tk-code{ font-size:12.5px; }
+  .tk-telon{ left:-16px; right:-16px; }
+  .tk-rollo{ left:16px; right:16px; }
+}
+
+/* "Servicios" en el menú: mientras se mira esa sección, sólo ese queda subrayado */
+html.nav-svc-on .nav-mid a.active:not(.nav-svc__a){ color:rgba(244,242,236,.55) !important; }
+html.nav-svc-on .nav-mid a.active:not(.nav-svc__a)::after{ display:none !important; }
+
+/* ---------- el rollo en 3D (rollo3d.js) ----------
+   en ángulo se ve sólo el 3D. De frente: el recibo real (quieto, ya pintado en
+   su capa: no se repinta al scrollear), la cortina del color de la sección tapa
+   lo que no salió y el 3D dibuja encima sólo el rollo y su sombra */
+.tk-3d{ position:absolute; z-index:5; display:block; cursor:pointer; transition:opacity .4s ease; max-width:none !important; max-height:none !important; }
+/* el papel real está siempre a la vista (ya dibujado): mientras el 3D está en
+   ángulo lo tapa la cortina entera; al ponerse de frente sólo se corre la cortina
+   (antes aparecía de golpe y el navegador tardaba un cuadro largo en dibujarlo) */
+.tk--3d .tk-papel{ opacity:1 !important; transition:none; }
+.tk--3d .tk-telon__i{ animation:none !important; }
+.tk--3d .tk-rollo{ display:none; }
+.tk--3d-recto .tk-3d{ pointer-events:none; }

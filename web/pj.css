@@ -1,0 +1,69 @@
+/* ============================================================
+   OPCIÓN A — personaje de la intro en "Sobre mí" (ver pj.js)
+   Como un sticker: relleno blanco, líneas negras, borde blanco
+   troquelado alrededor y una sombra corta, apenas torcido.
+   ============================================================ */
+#about .about-grid{ align-items:stretch !important; }
+#about .about-l.apj-col{ position:relative; padding-bottom:240px; }
+.apj{
+  position:absolute; left:0; bottom:0; width:min(330px, 72%);
+  transform:rotate(-3deg); transform-origin:30% 100%;
+  -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.apj .apj-btn{ display:block; width:100%; padding:0; margin:0; border:0; background:none; cursor:pointer; }
+.apj .apj-btn:focus-visible{ outline:2px dashed rgba(244,242,236,.6); outline-offset:8px; }
+.apj-img{
+  display:block; width:100%; height:auto; pointer-events:none;
+  /* el crema del dibujo pasa a blanco; el negro queda negro; borde troquelado blanco */
+  filter:brightness(1.08)
+    drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff)
+    drop-shadow(0 8px 12px rgba(0,0,0,.55));
+  transition:transform .35s cubic-bezier(.2,.8,.2,1); transform-origin:50% 100%;
+}
+@media (hover:hover){ .apj .apj-btn:hover .apj-img{ transform:translateY(-6px) rotate(1deg); } }
+/* mientras apretás: queda todo en blanco, como en los juegos */
+.apj.flash .apj-img{ filter:brightness(0) invert(1) drop-shadow(0 8px 12px rgba(0,0,0,.55)); }
+.apj.tiembla .apj-img{ animation:apjTiembla .5s ease-out; }
+@keyframes apjTiembla{
+  0%{ transform:translate(0,0) rotate(0); }
+  20%{ transform:translate(-8px,3px) rotate(-4deg); }
+  45%{ transform:translate(7px,1px) rotate(3deg); }
+  70%{ transform:translate(-4px,0) rotate(-1.5deg); }
+  100%{ transform:translate(0,0) rotate(0); }
+}
+/* lo que te dice: otro sticker, una etiqueta blanca con borde negro */
+.apj-txt{
+  position:absolute; left:34%; bottom:calc(100% - 4px); margin:0 !important;
+  /* es un <p> adentro de "Sobre mí": el sitio le pone ancho y saltos de línea */
+  white-space:nowrap !important; max-width:none !important; width:auto !important; line-height:1.3 !important;
+  color:#ffffff; background:none; padding:0;
+  font-family:'Poppins',sans-serif; font-size:19px; font-weight:700; letter-spacing:-.01em;
+  transform:rotate(-4deg) translateY(8px) scale(.9); transform-origin:0 100%;
+  opacity:0; transition:opacity .18s ease, transform .3s cubic-bezier(.2,.9,.3,1.35);
+  pointer-events:none;
+}
+.apj-txt.is-on{ opacity:1; transform:rotate(-4deg) translateY(0) scale(1); }
+
+/* celular: asomado por arriba de la foto (las manos sobre el borde) */
+@media (max-width:760px){
+  #about .about-grid{ row-gap:0 !important; }
+  #about .about-l.apj-col{ padding-bottom:0; position:relative; z-index:2; }
+  /* el borde donde apoya las manos (73 % del dibujo) queda justo en el borde de la foto */
+  #about .about-l.apj-col .apj{ position:relative; left:6px; width:min(250px, 66%); margin:92px 0 calc(min(250px, 66vw) * -0.16); }
+  .apj-txt{ font-size:16px; left:26%; }
+}
+
+/* ---------- ojos que siguen al mouse (ojos.js) ----------
+   el SVG va adentro de la página; el <img> queda encima, invisible,
+   para los clicks y para saber si está la cara de golpeado */
+.ojos{ position:relative; display:block; }
+.ojos > svg{ display:block; width:100%; height:auto; overflow:visible; }
+.ojos > .ojos-golpe{ display:none; }
+.ojos.is-golpe > .ojos-normal{ display:none; }
+.ojos.is-golpe > .ojos-golpe{ display:block; }
+.ojos > .ojos-img{ position:absolute; top:0; left:0; width:100% !important; height:100% !important; opacity:0 !important; filter:none !important; }
+.ojos path{ transition:transform .12s ease-out; }
+/* en la intro */
+.intro-egg .ojos{ filter:brightness(1.08); }
+.intro-egg .ojos > .ojos-img{ pointer-events:auto; cursor:pointer; }
+.intro-egg.flash .ojos{ filter:brightness(0) invert(1); }

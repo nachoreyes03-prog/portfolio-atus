@@ -1,0 +1,53 @@
+/* ============================================================
+   OPCIÓN A — retoques a la intro del aerosol (se carga después
+   de intro.css; la intro del sitio publicado no se toca)
+   ============================================================ */
+
+/* letra actual: Poppins normal, sin mayúsculas espaciadas en mono */
+.intro-btn{
+  font-family:'Poppins',sans-serif; font-size:17px; font-weight:600;
+  letter-spacing:-.005em; text-transform:none; padding:20px 42px;
+}
+.intro-hint{
+  font-family:'Poppins',sans-serif; font-size:19px; font-weight:500;
+  letter-spacing:-.01em; text-transform:none; color:#4d4b47;
+  transform:translate(-50%,-170px);
+}
+.intro-saltar{
+  font-family:'Poppins',sans-serif; font-size:15px; font-weight:500;
+  letter-spacing:0; text-transform:none; color:#4d4b47;
+}
+.intro-saltar:hover{ color:#0c0c0d; border-color:#0c0c0d; }
+.intro-egg .intro-egg-txt{
+  font-family:'Poppins',sans-serif; font-size:18px; font-weight:700;
+  letter-spacing:-.01em; text-transform:none;
+}
+
+/* el papel ahora es el blanco de Diseño Gráfico (#ffffff): el crema de la lata y
+   del personaje se aclara para que se fundan igual que antes */
+#intro-aerosol{ filter:brightness(1.08); }
+.intro-egg img{ filter:brightness(1.08); }
+
+/* traspaso al inicio: se va todo menos el logo, que viaja a su lugar */
+#atus-intro.traspaso{ background-color:transparent; transition:background-color .7s ease; pointer-events:none; }
+#atus-intro.traspaso #intro-canvas,
+#atus-intro.traspaso .intro-btn,
+#atus-intro.traspaso .intro-hint,
+#atus-intro.traspaso .intro-saltar,
+#atus-intro.traspaso .intro-egg,
+#atus-intro.traspaso #intro-aerosol{ opacity:0 !important; transition:opacity .35s ease !important; animation:none !important; }
+
+/* la caída: el golpe lo levanta un poco y después cae con peso, girando */
+.intro-egg.cae{ animation:egg-cae-a 1.15s forwards; }
+@keyframes egg-cae-a{
+  0%{ transform:translateY(0) rotate(0); animation-timing-function:cubic-bezier(.2,.7,.4,1); }
+  22%{ transform:translateY(-14%) rotate(-8deg); animation-timing-function:cubic-bezier(.55,0,.9,.55); }
+  100%{ transform:translateY(165%) rotate(32deg); }
+}
+
+@media (max-width:760px){
+  .intro-hint{ font-size:16px; transform:translate(-50%,-150px); }
+  .intro-btn{ font-size:15px; padding:17px 32px; }
+  .intro-saltar{ font-size:14px; }
+  .intro-egg .intro-egg-txt{ font-size:14.5px; }
+}
