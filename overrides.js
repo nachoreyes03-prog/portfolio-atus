@@ -240,7 +240,15 @@
 
   var app = document.getElementById('app');
   if (app){
-    new MutationObserver(queue).observe(app, { childList:true, subtree:true });
+    /* sólo cuando entran o salen elementos: los cambios de texto (letras que se mezclan, reloj)
+       lo disparaban en cada cuadro */
+    new MutationObserver(function(ms){
+      for (var i = 0; i < ms.length; i++){
+        var a = ms[i].addedNodes, r = ms[i].removedNodes, j;
+        for (j = 0; j < a.length; j++) if (a[j].nodeType === 1) { queue(); return; }
+        for (j = 0; j < r.length; j++) if (r[j].nodeType === 1) { queue(); return; }
+      }
+    }).observe(app, { childList:true, subtree:true });
   }
   if (document.readyState !== 'loading') apply();
   else document.addEventListener('DOMContentLoaded', apply);

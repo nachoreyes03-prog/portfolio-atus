@@ -4546,49 +4546,30 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
   }
 
   // Firma DISEÑO — CMYK en el título de la sección (scroll-triggered, 1 vez por montaje).
+  // (2026-10-30: con IntersectionObserver y no midiendo en cada evento de scroll, que trababa)
   var taggedC = new WeakSet();
-  var pendingCmyk = [];
-  function checkPendingCmyk(){
-    if (!pendingCmyk.length) return;
-    var vh = window.innerHeight || 800;
-    pendingCmyk = pendingCmyk.filter(function(el){
-      var r = el.getBoundingClientRect();
-      if (r.top < vh * 0.85 && r.bottom > 40){ el.classList.add('blur-in'); return false; }
-      return true;
-    });
-  }
+  var ioC = ('IntersectionObserver' in window) ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('blur-in'); ioC.unobserve(e.target); } });
+  }, { rootMargin:'0px 0px -12% 0px' }) : null;
+  function checkPendingCmyk(){}
   function markCmyk(root){
     root.querySelectorAll('#design .sec-title').forEach(function(el){
       if (taggedC.has(el)) return; taggedC.add(el);
-      setTimeout(function(){
-        var r = el.getBoundingClientRect(), vh = window.innerHeight || 800;
-        if (r.top < vh * 0.9 && r.bottom > 40) el.classList.add('blur-in');
-        else pendingCmyk.push(el);
-      }, 60);
+      if (ioC) ioC.observe(el); else el.classList.add('blur-in');
     });
   }
 
   // Scramble SÓLO en Ilustración (sección oscura), en CADA título.
   var SCRSEL = '.sec-dark .sec-title, .sec-dark .se-title, .sec-dark .se-feature-title';
   var taggedS = new WeakSet();
-  var pendingScr = [];
-  function checkPendingScr(){
-    if (!pendingScr.length) return;
-    var vh = window.innerHeight || 800;
-    pendingScr = pendingScr.filter(function(el){
-      var r = el.getBoundingClientRect();
-      if (r.top < vh * 0.82 && r.bottom > 40){ scramble(el); return false; }
-      return true;
-    });
-  }
+  var ioS = ('IntersectionObserver' in window) ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ ioS.unobserve(e.target); scramble(e.target); } });
+  }, { rootMargin:'0px 0px -16% 0px' }) : null;
+  function checkPendingScr(){}
   function markScramble(root){
     root.querySelectorAll(SCRSEL).forEach(function(el){
       if (taggedS.has(el)) return; taggedS.add(el);
-      setTimeout(function(){
-        var r = el.getBoundingClientRect(), vh = window.innerHeight || 800;
-        if (r.top < vh * 0.85 && r.bottom > 40) scramble(el);
-        else pendingScr.push(el);
-      }, 60);
+      if (ioS) ioS.observe(el); else scramble(el);
     });
   }
 
@@ -4683,14 +4664,15 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
   // Nav: compactar al scrollear + publicar su altura real en --nav-h para que la
   // barra de sección (sticky) se pegue JUSTO debajo del nav (que se encoge al
   // scrollear) en vez de meterse por debajo y bleedear a través del nav translúcido.
-  var nav, ticking=false;
+  var nav, ticking=false, navHUlt='';
   function syncNavH(){
     nav = nav || document.querySelector('.nav');
-    if (nav) document.documentElement.style.setProperty('--nav-h', Math.round(nav.getBoundingClientRect().height) + 'px');
+    if (!nav) return;
+    // sólo si cambió: escribir la variable en la raíz recalcula los estilos de toda la página
+    var v = Math.round(nav.getBoundingClientRect().height) + 'px';
+    if (v !== navHUlt){ navHUlt = v; document.documentElement.style.setProperty('--nav-h', v); }
   }
   function onScroll(){
-    checkPendingScr();
-    checkPendingCmyk();
     if (ticking) return; ticking=true;
     requestAnimationFrame(function(){
       nav = nav || document.querySelector('.nav');
@@ -4710,7 +4692,15 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
   // observamos #app para etiquetar lo nuevo en cada render.
   var app = document.getElementById('app');
   if (app){
-    new MutationObserver(queueScan).observe(app, { childList:true, subtree:true });
+    // sólo cuando entran o salen elementos: los cambios de texto (letras que se mezclan, reloj)
+    // lo disparaban sin parar
+    new MutationObserver(function(ms){
+      for (var i = 0; i < ms.length; i++){
+        var a = ms[i].addedNodes, r = ms[i].removedNodes, j;
+        for (j = 0; j < a.length; j++) if (a[j].nodeType === 1) { queueScan(); return; }
+        for (j = 0; j < r.length; j++) if (r[j].nodeType === 1) { queueScan(); return; }
+      }
+    }).observe(app, { childList:true, subtree:true });
   }
   if (document.readyState !== 'loading') scan();
   else document.addEventListener('DOMContentLoaded', scan);
@@ -4719,21 +4709,21 @@ ReactDOM.createRoot(document.getElementById('app')).render(<App />);
 </script>
 <link rel="stylesheet" href="overrides.css">
 <link rel="stylesheet" href="intro.css">
-<link rel="stylesheet" href="web/intro-a.css?v=1031b">
-<script src="web/ojos.js?v=1031b"></script>
-<script src="web/intro-a.js?v=1031b" defer></script>
-<script src="overrides.js"></script>
-<link rel="stylesheet" href="web/pulido.css?v=1031b">
-<script src="web/pulido.js?v=1031b"></script>
-<link rel="stylesheet" href="web/diseno.css?v=1031b">
-<script src="web/dg-ar.js?v=1031b"></script>
-<script src="web/diseno.js?v=1031b"></script>
-<link rel="stylesheet" href="web/libro.css?v=1031b">
-<script src="web/libro.js?v=1031b"></script>
-<link rel="stylesheet" href="web/servicios.css?v=1031b">
-<script src="web/rollo3d.js?v=1031b"></script>
-<script src="web/servicios.js?v=1031b"></script>
-<link rel="stylesheet" href="web/pj.css?v=1031b">
-<script src="web/pj.js?v=1031b"></script>
+<link rel="stylesheet" href="web/intro-a.css?v=1031f">
+<script src="web/ojos.js?v=1031f"></script>
+<script src="web/intro-a.js?v=1031f" defer></script>
+<script src="overrides.js?v=1031f"></script>
+<link rel="stylesheet" href="web/pulido.css?v=1031f">
+<script src="web/pulido.js?v=1031f"></script>
+<link rel="stylesheet" href="web/diseno.css?v=1031f">
+<script src="web/dg-ar.js?v=1031f"></script>
+<script src="web/diseno.js?v=1031f"></script>
+<link rel="stylesheet" href="web/libro.css?v=1031f">
+<script src="web/libro.js?v=1031f"></script>
+<link rel="stylesheet" href="web/servicios.css?v=1031f">
+<script src="web/rollo3d.js?v=1031f"></script>
+<script src="web/servicios.js?v=1031f"></script>
+<link rel="stylesheet" href="web/pj.css?v=1031f">
+<script src="web/pj.js?v=1031f"></script>
 </body>
 </html>

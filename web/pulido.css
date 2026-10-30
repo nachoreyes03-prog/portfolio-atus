@@ -163,7 +163,8 @@ html.pl-sin-wipe .hero-landing .hero-logo{ animation:none !important; -webkit-cl
 /* en el teléfono no hay hover: la pila se abre y se cierra sola */
 @media (hover:none), (max-width:760px){
   .pl-fan{ right:24%; top:30%; bottom:16%; width:14vw; }
-  .pl-fan img{ animation:plPeek 6s var(--pl-ease) infinite alternate; animation-delay:var(--d2); }
+  /* (la animación la pone pulido.js con valores fijos: con var() en los keyframes no iba por la placa de
+     video y recalculaba los estilos de la página en cada cuadro, aunque no se viera) */
 }
 /* celular: tarjetas más altas y la pila de piezas más grande */
 @media (max-width:760px){

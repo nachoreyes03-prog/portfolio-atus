@@ -158,10 +158,50 @@
         im.style.setProperty('--d', (i * 35) + 'ms');
         im.style.setProperty('--d2', (i * 0.35) + 's');
         fan.appendChild(im);
+        if (SOLA) solas.push(peek(im, p, i));
       });
       card.appendChild(fan);
+      if (SOLA && ioFan) ioFan.observe(fan);
     });
   }
+  /* en el teléfono (sin hover) la pila se abre y se cierra sola. Va con Web Animations y valores fijos
+     (no con var() en los keyframes): así la mueve la placa de video y no recalcula estilos en cada cuadro.
+     Cuando las tarjetas no se ven, se pausa. */
+  /* Los desplazamientos van en px (medidos de cada pieza): con % + rotate Chrome tampoco la mandaba a la placa. */
+  var SOLA = window.matchMedia && window.matchMedia('(hover:none), (max-width:760px)').matches;
+  var solas = [], fanVisible = true;
+  var ioFan = ('IntersectionObserver' in window) ? new IntersectionObserver(function (es) {
+    fanVisible = es.some(function (e) { return e.isIntersecting; });
+    solas.forEach(function (o) {
+      var a = o.im.__peek; if (!a) return;
+      if (fanVisible) { if (a.playState === 'paused') a.play(); } else if (a.playState === 'running') a.pause();
+    });
+  }) : null;
+  function peek(im, p, i){
+    if (!im.animate) return null;
+    function armar(){
+      var w = im.offsetWidth, h = im.offsetHeight;
+      if (!w || !h) return;
+      if (im.__peek) im.__peek.cancel();
+      var ease = (getComputedStyle(document.documentElement).getPropertyValue('--pl-ease') || '').trim() || 'ease-in-out';
+      var cerrado = 'translate3d(' + (-w / 2).toFixed(1) + 'px,' + (-h / 2).toFixed(1) + 'px,0) rotate(' + p.r0 + 'deg)';
+      var abierto = 'translate3d(' + ((p.x - 50) / 100 * w).toFixed(1) + 'px,' + ((p.y - 50) / 100 * h).toFixed(1) + 'px,0) rotate(' + p.r1 + 'deg)';
+      im.__peek = im.animate([
+        { transform: cerrado, offset: 0, easing: ease },
+        { transform: cerrado, offset: 0.25, easing: ease },
+        { transform: abierto, offset: 0.65, easing: ease },
+        { transform: abierto, offset: 1 }
+      ], { duration: 6000, delay: i * 350, iterations: Infinity, direction: 'alternate', fill: 'backwards' });
+      if (!fanVisible) im.__peek.pause();
+    }
+    if (im.complete && im.naturalWidth) armar(); else im.addEventListener('load', armar, { once: true });
+    return { im: im, armar: armar };
+  }
+  var rzFan = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(rzFan);
+    rzFan = setTimeout(function () { solas.forEach(function (o) { if (o) o.armar(); }); }, 200);
+  });
 
   /* ---------- reloj ---------- */
   var fmt = null;
@@ -179,22 +219,27 @@
       c = document.createElement('span'); c.className = 'pl-clock';
       ba.appendChild(c);
     }
-    c.textContent = fmt.format(new Date());
+    /* sólo si cambió: reescribirlo igual disparaba los observadores de la página y se armaba un bucle
+       que corría en cada cuadro (aplicar -> reloj -> cambio -> aplicar...) */
+    var txt = fmt.format(new Date());
+    if (c.textContent !== txt) c.textContent = txt;
   }
   setInterval(reloj, 15000);
 
   /* ---------- barra "Volver" del color de la página ---------- */
+  /* (escribe sólo si cambia algo: cada escritura obligaba a recalcular los estilos de toda la página) */
+  function poner(el, prop, v){ if (el.style[prop] !== v) el.style[prop] = v; }
   function barra(){
     var bar = document.querySelector('.section-view-bar');
-    if (!bar) { document.body.style.backgroundColor = ''; document.documentElement.classList.remove('pl-claro-page'); return; }
+    if (!bar) { poner(document.body, 'backgroundColor', ''); document.documentElement.classList.remove('pl-claro-page'); return; }
     var sec = bar.nextElementSibling;
     while (sec && sec.tagName !== 'SECTION') sec = sec.nextElementSibling;
     if (!sec) return;
     var cs = getComputedStyle(sec), bg = cs.backgroundColor;
     var vacio = !bg || bg === 'transparent' || /rgba\(0, 0, 0, 0\)/.test(bg);
     /* página oscura: el fondo de atrás también, así no asoma una franja clara */
-    document.body.style.backgroundColor = vacio ? '' : bg;
-    bar.style.backgroundColor = vacio ? getComputedStyle(document.body).backgroundColor : bg;
+    poner(document.body, 'backgroundColor', vacio ? '' : bg);
+    poner(bar, 'backgroundColor', vacio ? getComputedStyle(document.body).backgroundColor : bg);
     /* página clara (Diseño Gráfico): la barra va con letras oscuras */
     bar.classList.toggle('pl-claro', sec.id === 'design');
     document.documentElement.classList.toggle('pl-claro-page', sec.id === 'design');
@@ -252,8 +297,19 @@
 
   var pend = false;
   function cola(){ if (pend) return; pend = true; requestAnimationFrame(function(){ pend = false; aplicar(); }); }
+  /* sólo cuando entran o salen ELEMENTOS (una vista nueva, una sección): los cambios de texto (las letras
+     que se mezclan en Ilustración, el reloj) no cambian nada de lo que se marca acá y disparaban esto sin parar */
+  function relevante(ms){
+    for (var i = 0; i < ms.length; i++) {
+      var a = ms[i].addedNodes, r = ms[i].removedNodes, j;
+      for (j = 0; j < a.length; j++) if (a[j].nodeType === 1) return true;
+      for (j = 0; j < r.length; j++) if (r[j].nodeType === 1) return true;
+    }
+    return false;
+  }
+  window.__plRelevante = relevante;
   var app = document.getElementById('app');
-  if (app) new MutationObserver(cola).observe(app, { childList: true, subtree: true });
+  if (app) new MutationObserver(function (ms) { if (relevante(ms)) cola(); }).observe(app, { childList: true, subtree: true });
   if (document.readyState !== 'loading') aplicar(); else document.addEventListener('DOMContentLoaded', aplicar);
   setTimeout(aplicar, 500);
 })();

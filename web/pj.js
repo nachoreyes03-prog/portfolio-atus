@@ -80,7 +80,8 @@
   var cola = false;
   function pedir() { if (cola) return; cola = true; requestAnimationFrame(function () { cola = false; montar(); }); }
   var app = document.getElementById('app');
-  if (app) new MutationObserver(pedir).observe(app, { childList: true, subtree: true });
+  /* sólo cuando entran o salen elementos (los cambios de texto lo disparaban sin parar) */
+  if (app) new MutationObserver(function (ms) { for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes, r = ms[i].removedNodes, j; for (j = 0; j < a.length; j++) if (a[j].nodeType === 1) return pedir(); for (j = 0; j < r.length; j++) if (r[j].nodeType === 1) return pedir(); } }).observe(app, { childList: true, subtree: true });
   if (document.readyState !== 'loading') montar(); else document.addEventListener('DOMContentLoaded', montar);
   setTimeout(montar, 400);
 })();

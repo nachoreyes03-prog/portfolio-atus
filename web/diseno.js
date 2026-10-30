@@ -212,22 +212,27 @@
   var vio = 'IntersectionObserver' in window ? new IntersectionObserver(function (ents) {
     ents.forEach(function (en) {
       var v = en.target;
+      v.__ve = en.intersectionRatio >= .35;
       /* solo corren los que se ven bien (35 % o más): menos videos a la vez, scroll más fluido */
       if (en.isIntersecting && !v.getAttribute('src')) v.src = v.dataset.src;
-      if (en.intersectionRatio >= .35) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      if (v.__ve) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
       else if (!v.paused) v.pause();
     });
   }, { rootMargin: '60px 0px', threshold: [0, .35] }) : null;
+  /* en el celular, versiones livianas (854 px, hasta 30 cuadros): en Motion se ven hasta seis a la vez y
+     decodificar seis videos de 1440 px trababa el scroll */
+  var CELU = window.matchMedia && window.matchMedia('(max-width:760px)').matches;
   function loopVideo(name) {
     var v = el('video');
     v.muted = true; v.loop = true; v.playsInline = true;
     v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.setAttribute('aria-hidden', 'true');
-    v.preload = 'none'; v.poster = PREV + name + '.jpg'; v.dataset.src = PREV + name + '.mp4';
+    v.preload = 'none'; v.poster = PREV + name + '.jpg'; v.dataset.src = PREV + (CELU ? 'celu/' : '') + name + '.mp4';
     if (vio) vio.observe(v); else v.src = v.dataset.src;
     return v;
   }
+  /* el primer toque destraba la reproducción en algunos celulares: arranca sólo los que se ven */
   document.addEventListener('touchstart', function kick() {
-    $$('.dg video[data-src]').forEach(function (v) { if (v.getAttribute('src') && v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } });
+    $$('.dg video[data-src]').forEach(function (v) { if (v.__ve && v.getAttribute('src') && v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } });
     document.removeEventListener('touchstart', kick);
   }, { passive: true });
 
@@ -553,9 +558,23 @@
   })();
 
   /* ---------- meterlo en la vista Diseño Gráfico cada vez que aparece ---------- */
+  /* la vista vieja de Diseño (de React) queda escondida debajo de esta, pero sus videos con autoplay
+     (uno de 2560 px) seguían decodificándose todo el tiempo: se paran y se descargan */
+  function callarViejos(sec) {
+    $$('video', sec).forEach(function (v) {
+      if (root.contains(v) || v.__callado) return;
+      v.__callado = true;
+      v.autoplay = false; v.removeAttribute('autoplay');
+      try { v.pause(); } catch (e) {}
+      v.preload = 'none'; v.removeAttribute('src');
+      $$('source', v).forEach(function (s) { s.removeAttribute('src'); });
+      try { v.load(); } catch (e) {}
+    });
+  }
   function montar() {
     var sec = document.getElementById('design');
     if (!sec) { if (!pv.hidden) close(); return; }
+    callarViejos(sec);
     if (root.parentNode === sec) return;
     sec.insertBefore(root, sec.firstChild);
     requestAnimationFrame(function () { layoutAll(true); observarFilas(); });
@@ -564,6 +583,7 @@
   var pend = false;
   function cola() { if (pend) return; pend = true; setTimeout(function () { pend = false; montar(); }, 0); }
   var app = document.getElementById('app');
-  if (app) new MutationObserver(cola).observe(app, { childList: true, subtree: true });
+  /* sólo cuando entran o salen elementos (los cambios de texto lo disparaban sin parar) */
+  if (app) new MutationObserver(function (ms) { for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes, r = ms[i].removedNodes, j; for (j = 0; j < a.length; j++) if (a[j].nodeType === 1) return cola(); for (j = 0; j < r.length; j++) if (r[j].nodeType === 1) return cola(); } }).observe(app, { childList: true, subtree: true });
   if (document.readyState !== 'loading') montar(); else document.addEventListener('DOMContentLoaded', montar);
 })();
