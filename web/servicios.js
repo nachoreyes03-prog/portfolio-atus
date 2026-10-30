@@ -518,12 +518,13 @@
     return [(p0[0] + p1[0]) / 2 - dy / l * curva, (p0[1] + p1[1]) / 2 + dx / l * curva];
   }
   function trazoTilde(b) {
-    /* coordenadas desde la esquina del casillero (lado b) */
-    var a = [b * azar(-.18, .28), b * azar(.22, .6)];
-    var v = [b * azar(.3, .6), b * azar(.82, 1.22)];
-    var z = [b * azar(1.5, 2.6), b * azar(-1.25, -.3)];
+    /* coordenadas desde la esquina del casillero (lado b); un tilde que entra en el
+       casillero y se sale apenas (al final se centra sobre el casillero) */
+    var a = [b * azar(.04, .26), b * azar(.4, .62)];
+    var v = [b * azar(.36, .52), b * azar(.8, 1)];
+    var z = [b * azar(1.02, 1.35), b * azar(-.38, .02)];
     /* cada uno con su tamaño y su inclinación (gira alrededor del vértice) */
-    var esc = azar(.9, 1.25), giro = azar(-.2, .14), cg = Math.cos(giro), sg = Math.sin(giro);
+    var esc = azar(.95, 1.12), giro = azar(-.12, .1), cg = Math.cos(giro), sg = Math.sin(giro);
     [a, z].forEach(function (p) {
       var dx = (p[0] - v[0]) * esc, dy = (p[1] - v[1]) * esc;
       p[0] = v[0] + dx * cg - dy * sg; p[1] = v[1] + dx * sg + dy * cg;
@@ -541,11 +542,16 @@
     /* a veces, al levantar la lapicera, la punta se va un poco para el costado */
     if (Math.random() < .3) {
       var ult = pts[pts.length - 1], dir = [z[0] - v[0], z[1] - v[1]], dl = Math.hypot(dir[0], dir[1]) || 1;
-      var cola = b * azar(.12, .3), gira = azar(.5, 1.1);
+      var cola = b * azar(.08, .18), gira = azar(.5, 1.1);
       var fx = ult[0] + (dir[0] / dl * Math.cos(gira) - dir[1] / dl * Math.sin(gira)) * cola;
       var fy = ult[1] + (dir[0] / dl * Math.sin(gira) + dir[1] / dl * Math.cos(gira)) * cola;
       pts = pts.concat(curvaQ(ult, [ult[0] + dir[0] / dl * cola * .6, ult[1] + dir[1] / dl * cola * .6], [fx, fy], 5).slice(1));
     }
+    /* centrado sobre el casillero (con un pulso de diferencia, como a mano) */
+    var x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    pts.forEach(function (p) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+    var mx = b * (.5 + azar(-.04, .04)) - (x0 + x1) / 2, my = b * (.5 + azar(-.04, .04)) - (y0 + y1) / 2;
+    pts.forEach(function (p) { p[0] += mx; p[1] += my; });
     /* largo acumulado y normales */
     var n = pts.length, acc = [0], i;
     for (i = 1; i < n; i++) acc.push(acc[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
