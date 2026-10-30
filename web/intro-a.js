@@ -300,6 +300,7 @@
      logos que no coinciden ni el barrido de pintura encima */
   function salir(){
     if (intro.classList.contains('saliendo') || intro.classList.contains('traspaso')) return;
+    if (window.scrollY) window.scrollTo(0, 0); /* el logo va al del inicio, arriba de todo */
     var li = intro.querySelector('.intro-fondo img');
     var lh = document.querySelector('.hero-landing .hero-logo');
     var a = li && li.getBoundingClientRect(), b = lh && lh.getBoundingClientRect();
@@ -309,7 +310,8 @@
     var s = b.width / a.width;
     document.documentElement.classList.add('intro-traspaso');
     intro.classList.add('traspaso');
-    document.body.style.overflow = '';
+    /* el scroll queda trabado hasta que el logo aterriza (irse lo destraba): si no,
+       al bajar rápido la página se movía y el logo grande quedaba flotando encima */
     var vuelo = li.animate(
       [{ transform: 'translate(0px,0px) scale(1)' }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + s + ')' }],
       { duration: 850, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'forwards' }

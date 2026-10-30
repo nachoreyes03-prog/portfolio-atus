@@ -29,7 +29,8 @@
 .intro-egg img{ filter:brightness(1.08); }
 
 /* traspaso al inicio: se va todo menos el logo, que viaja a su lugar */
-#atus-intro.traspaso{ background-color:transparent; transition:background-color .7s ease; pointer-events:none; }
+/* durante el vuelo sigue atajando los toques: en el celu no se puede arrastrar la página */
+#atus-intro.traspaso{ background-color:transparent; transition:background-color .7s ease; }
 #atus-intro.traspaso #intro-canvas,
 #atus-intro.traspaso .intro-btn,
 #atus-intro.traspaso .intro-hint,
